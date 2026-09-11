@@ -1,0 +1,789 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.about-wrapper{ padding: 50px 0; }
+
+.about-hero{
+    background: #fff;
+    border-radius: 30px;
+    padding: 60px;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.about-title{ font-size: 3rem; font-weight: 600; }
+.about-title span{ color: #198754; }
+
+.about-text{
+    font-size: 1.05rem;
+    color: #6b7280;
+    line-height: 1.9;
+    margin-top: 12px;
+}
+
+.store-image{
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.10);
+}
+
+.store-image img{ width: 100%; height: 100%; object-fit: cover; }
+
+.info-section{ margin-top: 70px; }
+
+.info-card{
+    background: #fff;
+    border-radius: 22px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    transition: 0.3s ease;
+    height: 100%;
+}
+
+.info-card:hover{ transform: translateY(-6px); }
+.info-icon{ font-size: 38px; color: #198754; margin-bottom: 10px; }
+
+.contact-section{ margin-top: 80px; }
+
+.contact-box{
+    background: #f8fafc;
+    padding: 14px 18px;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.social-section{ display: flex; gap: 12px; margin-top: 18px; }
+
+.social-btn{
+    width: 50px; height: 50px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 20px; transition: 0.3s;
+}
+.social-btn:hover{ transform: translateY(-5px); }
+.fb{ background:#1877f2; }
+.ig{ background:linear-gradient(45deg,#feda75,#d62976,#962fbf); }
+.tt{ background:#111; }
+.wa{ background:#25D366; }
+
+#map{
+    height: 420px;
+    border-radius: 24px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.10);
+}
+
+@media(max-width: 768px){
+    .about-hero{ padding: 30px; }
+    .about-title{ font-size: 2rem; }
+    #map{ height: 320px; }
+}
+
+/* =========================
+   CHATBOT
+========================= */
+
+#chatbot-toggle-wrap{
+    position: fixed;
+    bottom: 30px; right: 30px;
+    z-index: 9999;
+}
+
+#chatbot-notif{
+    position: absolute;
+    top: -4px; right: -4px;
+    width: 16px; height: 16px;
+    background: #ef4444;
+    border-radius: 50%;
+    border: 2px solid white;
+    display: none;
+}
+
+#chatbot-toggle{
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1f8f4a, #136f38);
+    color: white; font-size: 24px;
+    border: none; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(31,143,74,0.45);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#chatbot-toggle:hover{
+    transform: scale(1.1);
+    box-shadow: 0 10px 28px rgba(31,143,74,0.55);
+}
+
+#chatbot-window{
+    position: fixed;
+    bottom: 100px; right: 30px;
+    width: 350px; max-height: 520px;
+    background: #fff;
+    border-radius: 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.16);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    z-index: 9998;
+    transform: scale(0.85) translateY(20px);
+    opacity: 0; pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#chatbot-window.open{
+    transform: scale(1) translateY(0);
+    opacity: 1; pointer-events: all;
+}
+
+.chatbot-header{
+    background: linear-gradient(135deg, #1f8f4a, #136f38);
+    color: white;
+    padding: 16px 18px;
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
+}
+
+.chatbot-avatar{
+    width: 38px; height: 38px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+}
+
+.chatbot-name{ font-weight: 700; font-size: 0.95rem; line-height: 1.2; }
+
+.chatbot-status{
+    font-size: 0.75rem; opacity: 0.9;
+    display: flex; align-items: center; gap: 5px;
+}
+
+.status-dot{
+    width: 7px; height: 7px;
+    background: #86efac; border-radius: 50%;
+    display: inline-block;
+    animation: pulse-dot 1.8s infinite;
+}
+
+@keyframes pulse-dot{
+    0%,100%{ opacity:1; } 50%{ opacity:0.3; }
+}
+
+.chatbot-close{
+    margin-left: auto; background: none;
+    border: none; color: white;
+    font-size: 18px; cursor: pointer;
+    opacity: 0.8; line-height:1; padding:0;
+}
+.chatbot-close:hover{ opacity:1; }
+
+.chatbot-messages{
+    flex: 1; overflow-y: auto;
+    padding: 14px; display: flex;
+    flex-direction: column; gap: 10px;
+    background: #f8fafc;
+}
+
+.chatbot-messages::-webkit-scrollbar{ width: 4px; }
+.chatbot-messages::-webkit-scrollbar-thumb{
+    background: #d1d5db; border-radius: 4px;
+}
+
+.chat-bubble{
+    max-width: 84%; padding: 10px 14px;
+    border-radius: 16px; font-size: 0.855rem;
+    line-height: 1.55; word-break: break-word;
+}
+
+.chat-bubble.bot{
+    background: #fff; color: #111827;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    align-self: flex-start;
+}
+
+.chat-bubble.user{
+    background: linear-gradient(135deg,#1f8f4a,#136f38);
+    color: white;
+    border-bottom-right-radius: 4px;
+    align-self: flex-end;
+}
+
+.chat-bubble.typing{
+    background:#fff; align-self:flex-start;
+    box-shadow:0 2px 8px rgba(0,0,0,0.07);
+    padding:12px 16px;
+}
+
+.typing-dots{ display:flex; gap:4px; align-items:center; }
+.typing-dots span{
+    width:7px; height:7px; background:#9ca3af;
+    border-radius:50%; animation:typing-bounce 1.2s infinite;
+}
+.typing-dots span:nth-child(2){ animation-delay:0.2s; }
+.typing-dots span:nth-child(3){ animation-delay:0.4s; }
+
+@keyframes typing-bounce{
+    0%,80%,100%{ transform:translateY(0); }
+    40%{ transform:translateY(-6px); }
+}
+
+.quick-replies{
+    display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;
+}
+
+.quick-chip{
+    background:#fff; border:1.5px solid #d1d5db;
+    border-radius:20px; padding:5px 11px;
+    font-size:0.775rem; font-weight:500;
+    color:#374151; cursor:pointer; transition:0.2s;
+    font-family:'Poppins',sans-serif;
+}
+
+.quick-chip:hover{
+    border-color:#1f8f4a; color:#1f8f4a; background:#f0fdf4;
+}
+
+.chatbot-input-area{
+    padding:12px 14px;
+    border-top:1px solid #e5e7eb;
+    display:flex; gap:8px; background:#fff;
+    flex-shrink:0;
+}
+
+#chatbot-input{
+    flex:1; border:1.5px solid #e5e7eb;
+    border-radius:12px; padding:9px 14px;
+    font-size:0.875rem; font-family:'Poppins',sans-serif;
+    outline:none; transition:border-color 0.2s;
+}
+
+#chatbot-input:focus{ border-color:#1f8f4a; }
+
+#chatbot-send{
+    width:38px; height:38px;
+    border-radius:10px;
+    background:linear-gradient(135deg,#1f8f4a,#136f38);
+    border:none; color:white; font-size:15px;
+    cursor:pointer; display:flex;
+    align-items:center; justify-content:center;
+    transition:0.2s; flex-shrink:0;
+}
+
+#chatbot-send:hover{ transform:scale(1.08); }
+
+@media(max-width:480px){
+    #chatbot-window{
+        width:calc(100vw - 24px);
+        right:12px; bottom:88px;
+    }
+    #chatbot-toggle-wrap{ right:15px; bottom:20px; }
+}
+
+</style>
+
+<div class="container about-wrapper">
+
+    <div class="about-hero">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <h1 class="about-title">About <span>DesiKnot</span></h1>
+                <p class="about-text">
+                    Welcome to DesiKnot — your modern fashion destination in Imadol, Lalitpur,
+                    offering elegant ethnic wear and contemporary styles.
+                </p>
+                <p class="about-text">
+                    We believe fashion should be premium, comfortable, and affordable — designed
+                    for every occasion, every personality, every moment.
+                </p>
+            </div>
+            <div class="col-lg-5">
+                <div class="store-image">
+                    <img src="{% static 'images/store.png' %}" alt="DesiKnot Store">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="info-card">
+                    <div class="info-icon">💎</div>
+                    <h5>Premium Quality</h5>
+                    <p>Carefully selected fabrics with long-lasting comfort and elegance.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-card">
+                    <div class="info-icon">✨</div>
+                    <h5>Modern Ethnic Style</h5>
+                    <p>Traditional designs blended with modern fashion trends.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-card">
+                    <div class="info-icon">❤️</div>
+                    <h5>Customer First</h5>
+                    <p>We focus on trust, satisfaction, and a smooth shopping experience.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="contact-section">
+        <div class="row g-5">
+            <div class="col-lg-5">
+                <h3 class="mb-3">Contact Us</h3>
+                <div class="contact-box">📞 +977 9713309436</div>
+                <div class="contact-box">📍 Imadol, Lalitpur</div>
+                <h5 class="mt-4">Follow Us</h5>
+                <div class="social-section">
+                    <a href="https://www.facebook.com/share/1Ddx3aQHSC/?mibextid=wwXIfr" class="social-btn fb" target="_blank"><i class="bi bi-facebook"></i></a>
+                    <a href="https://www.instagram.com/desi_knot" class="social-btn ig" target="_blank"><i class="bi bi-instagram"></i></a>
+                    <a href="https://www.tiktok.com/@desi_knot" class="social-btn tt" target="_blank"><i class="bi bi-tiktok"></i></a>
+                    <a href="https://wa.me/9779713309436" class="social-btn wa" target="_blank"><i class="bi bi-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <h3 class="mb-3">Visit Our Store</h3>
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- CHATBOT -->
+<div id="chatbot-toggle-wrap">
+    <div id="chatbot-notif"></div>
+    <button id="chatbot-toggle" aria-label="Open chat">
+        <i class="bi bi-chat-dots-fill" id="chat-icon"></i>
+    </button>
+</div>
+
+<div id="chatbot-window" role="dialog" aria-label="DesiKnot Support Chat">
+    <div class="chatbot-header">
+        <div class="chatbot-avatar">👗</div>
+        <div>
+            <div class="chatbot-name">DesiKnot Support</div>
+            <div class="chatbot-status"><span class="status-dot"></span> Online — Ready to help</div>
+        </div>
+        <button class="chatbot-close" id="chatbot-close">✕</button>
+    </div>
+    <div class="chatbot-messages" id="chatbot-messages"></div>
+    <div class="chatbot-input-area">
+        <input type="text" id="chatbot-input" placeholder="Type your message..." autocomplete="off" maxlength="300">
+        <button id="chatbot-send"><i class="bi bi-send-fill"></i></button>
+    </div>
+</div>
+
+<script>
+const storeLat = 27.6658;
+const storeLng = 85.3390;
+const map = L.map('map').setView([storeLat, storeLng], 16);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19 }).addTo(map);
+L.marker([storeLat, storeLng]).addTo(map).bindPopup("<b>DesiKnot Store</b><br>Imadol, Lalitpur").openPopup();
+setTimeout(() => map.invalidateSize(), 300);
+map.attributionControl.remove();
+</script>
+
+<script>
+// =============================================
+// DESIKNOT CHATBOT — FULL AUTO-REPLY ENGINE
+// =============================================
+
+const REPLIES = [
+
+    // --- GREETINGS ---
+    {
+        keys: ['hi','hello','hey','namaste','hii','helo','howdy','greet'],
+        reply: "👋 Hello! Welcome to **DesiKnot**!\n\nWe're happy you're here. How can we assist you today? 😊",
+        chips: ["Products", "Custom Order", "Delivery", "Store Hours", "Contact Us"]
+    },
+
+    // --- STORE HOURS ---
+    {
+        keys: ['hour','open','close','time','timing','schedule','when','available','availability'],
+        reply: "🕐 **DesiKnot Store Hours:**\n\n📅 Sunday – Friday: 10:00 AM – 7:00 PM\n📅 Saturday: 11:00 AM – 6:00 PM\n\nWe're also available online 24/7 for browsing and placing orders!",
+        chips: ["Location", "Contact Us", "Order Online"]
+    },
+
+    // --- LOCATION ---
+    {
+        keys: ['location','address','where','find','imadol','lalitpur','map','directions','store','visit'],
+        reply: "📍 **Our Store Location:**\n\nImadol, Lalitpur, Nepal\n\nYou can find us on the map on this page, or WhatsApp us for exact directions! 🗺️",
+        chips: ["Store Hours", "Contact Us", "WhatsApp Us"]
+    },
+
+    // --- CONTACT ---
+    {
+        keys: ['phone','contact','call','number','reach','support','help','talk','speak'],
+        reply: "📞 **Contact DesiKnot:**\n\nPhone/WhatsApp: **+977 9713309436**\n\nYou can also reach us on:\n📘 Facebook: DesiKnot\n📸 Instagram: @desi_knot\n🎵 TikTok: @desi_knot",
+        chips: ["WhatsApp Us", "Store Hours", "Location"]
+    },
+
+    // --- WHATSAPP ---
+    {
+        keys: ['whatsapp','whats app','wa','chat'],
+        reply: "💬 You can reach us directly on WhatsApp:\n\n📱 **+977 9713309436**\n\nTap the button below to open a chat with us instantly!",
+        chips: ["Open WhatsApp", "Store Hours", "Contact Us"]
+    },
+
+    // --- PRODUCTS / CATEGORIES ---
+    {
+        keys: ['product','collection','item','cloth','clothes','wear','outfit','fashion','browse','shop','show','what do you sell','what you sell'],
+        reply: "👗 **Our Collections:**\n\n🪡 Ethnic Wear — Kurtas, sets & traditional styles\n👚 Western Wear — Trendy & modern looks\n👗 Skirts & Dresses — For every occasion\n\nBrowse everything on our **Home Page** with price filters and sorting!",
+        chips: ["Ethnic Wear", "Western Wear", "Price Range", "How to Order"]
+    },
+
+    // --- ETHNIC WEAR ---
+    {
+        keys: ['ethnic','kurta','kurtha','traditional','nepali','desi','set'],
+        reply: "🪡 **Ethnic Wear at DesiKnot:**\n\nWe carry beautiful kurtas, ethnic sets and traditional Nepali-inspired fashion crafted with premium fabrics.\n\nYou can also place a **Custom Order** if you want a unique design stitched just for you! ✂️",
+        chips: ["Custom Order", "Price Range", "How to Order", "Delivery"]
+    },
+
+    // --- WESTERN WEAR ---
+    {
+        keys: ['western','modern','casual','top','jeans','trendy'],
+        reply: "👚 **Western Wear at DesiKnot:**\n\nWe blend modern trends with quality fabrics. From casual tops to trendy outfits — we've got you covered!\n\nVisit our Home Page to browse the full western wear collection. 🛍️",
+        chips: ["Price Range", "How to Order", "Delivery"]
+    },
+
+    // --- SKIRTS & DRESSES ---
+    {
+        keys: ['skirt','dress','frock','gown'],
+        reply: "👗 **Skirts & Dresses at DesiKnot:**\n\nFrom flowy skirts to elegant dresses, we have styles for every occasion — casual, festive, and formal.\n\nBrowse our full collection on the Home Page!",
+        chips: ["Price Range", "How to Order", "Delivery"]
+    },
+
+    // --- PRICE ---
+    {
+        keys: ['price','cost','rate','how much','affordable','cheap','expensive','budget','range'],
+        reply: "💰 **Pricing at DesiKnot:**\n\nWe offer premium quality at affordable prices. You can:\n\n🔍 Browse by price using our **min/max price filter** on the Home Page\n📊 Sort products by **Lowest Price**, **Highest Price**, or **Newest**\n\nVisit our Home Page to find exactly what fits your budget!",
+        chips: ["Products", "How to Order", "Delivery"]
+    },
+
+    // --- HOW TO ORDER ---
+    {
+        keys: ['how to order','place order','buy','purchase','ordering','order process','how order'],
+        reply: "🛒 **How to Place an Order:**\n\n1️⃣ Browse products on the Home Page\n2️⃣ Click a product → Add to Cart\n3️⃣ Go to Cart → Review items\n4️⃣ Click **Checkout**\n5️⃣ Enter your address & delivery zone\n6️⃣ Choose payment: **COD** or **eSewa QR**\n7️⃣ Confirm — Done! ✅",
+        chips: ["Payment Methods", "Delivery", "Track My Order", "Cart Help"]
+    },
+
+    // --- CART ---
+    {
+        keys: ['cart','basket','added','remove from cart','update cart'],
+        reply: "🛒 **Your Cart:**\n\nYou can:\n✅ Add products to cart from any product page\n✏️ Update quantities directly in the cart\n❌ Remove items using the Remove button\n➡️ Proceed to Checkout when ready\n\nAccess your cart anytime from the **navbar**!",
+        chips: ["How to Order", "Checkout", "Payment Methods"]
+    },
+
+    // --- CHECKOUT ---
+    {
+        keys: ['checkout','check out','proceed','confirm order'],
+        reply: "💳 **Checkout Steps:**\n\n1️⃣ Select your **Delivery Zone** (Inside/Outside Valley)\n2️⃣ Enter your **Delivery Address**\n3️⃣ Choose **Payment Method** (COD or eSewa QR)\n4️⃣ Click **Complete Order**\n\nYour order will appear in **My Orders** right away!",
+        chips: ["Payment Methods", "Delivery", "Track My Order"]
+    },
+
+    // --- PAYMENT ---
+    {
+        keys: ['pay','payment','esewa','qr','cod','cash','online pay','digital','method'],
+        reply: "💳 **Payment Methods at DesiKnot:**\n\n📦 **Cash on Delivery (COD)**\n→ Pay in cash when your order arrives at your door\n\n🟢 **eSewa QR Payment**\n→ Scan our QR code in the eSewa app and pay the full amount digitally\n→ Upload your payment screenshot to confirm",
+        chips: ["eSewa Payment Guide", "COD Info", "Delivery Charges", "Track My Order"]
+    },
+
+    // --- ESEWA GUIDE ---
+    {
+        keys: ['esewa','qr payment','how to pay qr','scan qr','qr guide','payment screenshot','screenshot'],
+        reply: "🟢 **How to Pay via eSewa QR:**\n\n1️⃣ Choose **QR Payment** at checkout\n2️⃣ On the payment page, scan the QR code using your **eSewa app**\n3️⃣ Complete the transaction\n4️⃣ Take a screenshot of the success screen\n5️⃣ Upload the screenshot on the payment page\n6️⃣ Our team will verify and approve your order ✅",
+        chips: ["Track My Order", "Contact Us", "Delivery"]
+    },
+
+    // --- COD ---
+    {
+        keys: ['cash on delivery','cod','pay on delivery','pay at door'],
+        reply: "📦 **Cash on Delivery (COD):**\n\nWith COD, you pay in cash when your parcel arrives at your doorstep — no upfront payment needed!\n\n⚠️ Note: A delivery charge applies based on your zone:\n• Inside Valley: **Rs 120**\n• Outside Valley: **Rs 180**",
+        chips: ["Delivery Charges", "How to Order", "Track My Order"]
+    },
+
+    // --- DELIVERY ---
+    {
+        keys: ['deliver','delivery','shipping','ship','send','courier','receive','arrive','how long'],
+        reply: "🚚 **Delivery Information:**\n\n📦 **Inside Kathmandu Valley:** Rs 120\n⏱ Estimated: 1–2 business days\n\n📦 **Outside Kathmandu Valley:** Rs 180\n⏱ Estimated: 2–3 business days\n\nDelivery charges are added at checkout automatically based on your selected zone.",
+        chips: ["Payment Methods", "Track My Order", "How to Order"]
+    },
+
+    // --- TRACK ORDER ---
+    {
+        keys: ['track','status','my order','order status','where is my order','order update','pending','shipped','approved','completed'],
+        reply: "📦 **Track Your Order:**\n\nLog in to your account and go to **My Orders** from the top menu.\n\nYour order status updates through these stages:\n⏳ Pending → ✅ Approved → 🚚 Shipped → 📬 Delivered\n\nYou'll also receive a notification when your order status changes!",
+        chips: ["Order Stages", "Contact Us", "Payment Methods"]
+    },
+
+    // --- ORDER STAGES ---
+    {
+        keys: ['order stage','order stages','what does pending mean','what is approved','what is shipped'],
+        reply: "📋 **Order Status Stages:**\n\n⏳ **Pending** — Order received, awaiting review\n✅ **Approved** — Confirmed & being prepared\n🚚 **Shipped** — Dispatched, on the way to you\n📬 **Completed** — Delivered successfully\n❌ **Cancelled** — Order was cancelled\n\nYou get a notification for every update!",
+        chips: ["Track My Order", "Contact Us", "Delivery"]
+    },
+
+    // --- CUSTOM ORDER ---
+    {
+        keys: ['custom','stitch','tailor','sew','design','custom order','custom made','hand made','made to order','measurement'],
+        reply: "✂️ **Custom Orders at DesiKnot:**\n\nWant something uniquely yours? We stitch kurtas and ethnic wear to your exact measurements!\n\n**How it works:**\n1️⃣ Click **Custom Order** in the navbar\n2️⃣ Step 1 — Fill in your details (name, address, contact)\n3️⃣ Step 2 — Add measurements & upload reference images\n4️⃣ Chat directly with our team to finalize the design 💬",
+        chips: ["Measurements Needed", "Custom Order Chat", "Delivery", "Contact Us"]
+    },
+
+    // --- MEASUREMENTS ---
+    {
+        keys: ['measure','measurement','bust','waist','hip','height','size','fit'],
+        reply: "📏 **Measurements We Need for Custom Orders:**\n\n👗 **Bust** — Around the fullest part of the chest\n👗 **Waist** — Around the narrowest part\n👗 **Hip** — Around the fullest part of the hips\n📏 **Height** — Head to toe\n\nYou can also upload a **reference image** of your desired design when placing the custom order!",
+        chips: ["How to Custom Order", "Contact Us", "Delivery"]
+    },
+
+    // --- CUSTOM ORDER CHAT ---
+    {
+        keys: ['custom order chat','chat with owner','talk to owner','message owner','order chat','discuss design'],
+        reply: "💬 **Custom Order Chat:**\n\nAfter placing a custom order, you get a **direct chat with our team** to discuss:\n\n🎨 Design preferences\n🧵 Fabric choices\n📅 Delivery timeline\n📸 Reference images\n\nGo to **My Orders → Custom Orders** and click on your order to open the chat!",
+        chips: ["How to Custom Order", "My Orders", "Contact Us"]
+    },
+
+    // --- ACCOUNT / REGISTER ---
+    {
+        keys: ['account','register','sign up','signup','create account','login','log in','forgot password'],
+        reply: "👤 **Your DesiKnot Account:**\n\n📝 **Register** — Click Login → Register to create a free account\n🔐 **Login** — Use your username & password\n\nWith an account you can:\n✅ Track your orders\n💖 Save items to Wishlist\n✉️ Chat on Custom Orders\n⭐ Write product reviews",
+        chips: ["My Orders", "Wishlist", "Custom Order", "Contact Us"]
+    },
+
+    // --- WISHLIST ---
+    {
+        keys: ['wishlist','wish list','save','favourite','favorite','liked','heart'],
+        reply: "💖 **Wishlist Feature:**\n\nYou can save any product to your Wishlist by clicking the ❤️ heart icon on a product.\n\nAccess your wishlist from **Account → Wishlist** in the top menu.\n\nNote: You need to be logged in to use this feature!",
+        chips: ["Account Info", "Products", "How to Order"]
+    },
+
+    // --- REVIEWS ---
+    {
+        keys: ['review','rating','feedback','comment','star','rate product'],
+        reply: "⭐ **Product Reviews:**\n\nYou can leave a review on any product page after browsing it.\n\n📝 Write a comment\n⭐ Give a 1–5 star rating\n\nReviews help other customers make better decisions! One review per product per account.",
+        chips: ["Products", "Account Info", "How to Order"]
+    },
+
+    // --- NOTIFICATIONS ---
+    {
+        keys: ['notification','notify','alert','bell','update me'],
+        reply: "🔔 **Notifications at DesiKnot:**\n\nYou automatically receive notifications for:\n\n📦 New order placed\n✅ Order status changes (Approved, Shipped, Delivered)\n💬 New messages on your Custom Orders\n\nCheck them from **Account → Orders** in the navbar!",
+        chips: ["Track My Order", "Custom Order Chat", "My Orders"]
+    },
+
+    // --- RETURN / REFUND ---
+    {
+        keys: ['return','refund','exchange','replace','wrong item','damaged','defective','problem with order'],
+        reply: "🔄 **Returns & Exchanges:**\n\nIf you received a wrong or damaged item, please contact us within **3 days** of receiving your order:\n\n📞 Call/WhatsApp: **+977 9713309436**\n\nOur team will review your case and arrange a replacement or resolution as quickly as possible!",
+        chips: ["WhatsApp Us", "Contact Us", "Track My Order"]
+    },
+
+    // --- SOCIAL MEDIA ---
+    {
+        keys: ['facebook','instagram','tiktok','social','follow us','social media'],
+        reply: "📱 **Follow DesiKnot on Social Media:**\n\n👍 Facebook: **DesiKnot**\n📸 Instagram: **@desi_knot**\n🎵 TikTok: **@desi_knot**\n💬 WhatsApp: **+977 9713309436**\n\nStay updated on new arrivals, offers, and behind-the-scenes content!",
+        chips: ["Contact Us", "Products", "Store Hours"]
+    },
+
+    // --- MY ORDERS ---
+    {
+        keys: ['my orders','past orders','order history','view orders','order list'],
+        reply: "📋 **My Orders:**\n\nLog in to your account and click **Account → Orders** in the navbar.\n\nYou'll see:\n📦 All regular orders with status\n✂️ All custom orders with chat access\n💳 Payment method & total amount\n📅 Order date and tracking stage",
+        chips: ["Track My Order", "Order Stages", "Custom Order Chat"]
+    },
+
+    // --- PROFILE ---
+    {
+        keys: ['profile','edit profile','update profile','my profile','personal info','change name','change email'],
+        reply: "👤 **Your Profile:**\n\nYou can update your profile from **Account → Profile** in the navbar:\n\n✏️ Edit your name, email, phone\n📸 Upload a profile photo\n\nMake sure your contact info is up to date for smooth order delivery!",
+        chips: ["Account Info", "My Orders", "Contact Us"]
+    },
+
+    // --- THANK YOU ---
+    {
+        keys: ['thank','thanks','thank you','thankyou','okay','ok','got it','perfect','great','awesome','wonderful','nice'],
+        reply: "You're welcome! 😊 We're always here if you need anything else.\n\nHappy shopping at **DesiKnot**! 💚",
+        chips: ["Products", "Custom Order", "Contact Us"]
+    },
+
+    // --- GOODBYE ---
+    {
+        keys: ['bye','goodbye','see you','later','take care','good night','good day'],
+        reply: "Goodbye! 👋 Thank you for visiting DesiKnot.\n\nCome back anytime — we'd love to help you find something beautiful! 💚",
+        chips: []
+    },
+];
+
+// Special chip actions
+const CHIP_ACTIONS = {
+    "WhatsApp Us":      () => window.open("https://wa.me/9779713309436", "_blank"),
+    "Open WhatsApp":    () => window.open("https://wa.me/9779713309436", "_blank"),
+    "Order Online":     () => window.location.href = "/",
+    "Products":         () => window.location.href = "/",
+    "Ethnic Wear":      () => window.location.href = "/category/ethnic-wear/",
+    "Western Wear":     () => window.location.href = "/category/western-wear/",
+    "My Orders":        () => window.location.href = "/my-orders/",
+    "Custom Order":     () => window.location.href = "/custom-order/step1/",
+    "Checkout":         () => window.location.href = "/checkout/",
+};
+
+// Fallback
+const FALLBACK = {
+    reply: "I'm not sure about that, but our friendly team is happy to help! 😊\n\n📞 Call/WhatsApp: **+977 9713309436**\n\nOr visit us at Imadol, Lalitpur during store hours.",
+    chips: ["Store Hours", "Contact Us", "WhatsApp Us", "Products"]
+};
+
+// DOM
+const toggle      = document.getElementById('chatbot-toggle');
+const chatWindow  = document.getElementById('chatbot-window');
+const closeBtn    = document.getElementById('chatbot-close');
+const msgBox      = document.getElementById('chatbot-messages');
+const inputField  = document.getElementById('chatbot-input');
+const sendBtn     = document.getElementById('chatbot-send');
+const notifDot    = document.getElementById('chatbot-notif');
+const chatIcon    = document.getElementById('chat-icon');
+
+let isOpen = false;
+let greetingDone = false;
+
+function openChat(){
+    isOpen = true;
+    chatWindow.classList.add('open');
+    chatIcon.className = 'bi bi-x-lg';
+    notifDot.style.display = 'none';
+    if(!greetingDone){
+        greetingDone = true;
+        setTimeout(() => showTyping(
+            "👋 Hi! Welcome to **DesiKnot** 💚\n\nI'm here to help you with products, orders, custom stitching, delivery, payments and more.\n\nWhat can I help you with today?",
+            ["Products", "Custom Order", "Delivery", "Store Hours", "Contact Us", "My Orders"]
+        ), 500);
+    }
+    setTimeout(() => inputField.focus(), 300);
+}
+
+function closeChat(){
+    isOpen = false;
+    chatWindow.classList.remove('open');
+    chatIcon.className = 'bi bi-chat-dots-fill';
+}
+
+toggle.addEventListener('click', () => isOpen ? closeChat() : openChat());
+closeBtn.addEventListener('click', closeChat);
+
+// Notification dot after 4s
+setTimeout(() => { if(!isOpen && !greetingDone) notifDot.style.display = 'block'; }, 4000);
+
+function sendMessage(){
+    const text = inputField.value.trim();
+    if(!text) return;
+    addBubble(text, 'user');
+    inputField.value = '';
+
+    const lower = text.toLowerCase();
+    let matched = null;
+    for(const rule of REPLIES){
+        if(rule.keys.some(k => lower.includes(k))){ matched = rule; break; }
+    }
+    const res = matched || FALLBACK;
+    showTyping(res.reply, res.chips || []);
+}
+
+sendBtn.addEventListener('click', sendMessage);
+inputField.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+});
+
+function addBubble(text, type){
+    const b = document.createElement('div');
+    b.className = `chat-bubble ${type}`;
+    b.innerHTML = fmt(text);
+    msgBox.appendChild(b);
+    scrollDown();
+    return b;
+}
+
+function showTyping(replyText, chips){
+    const t = document.createElement('div');
+    t.className = 'chat-bubble typing';
+    t.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+    msgBox.appendChild(t);
+    scrollDown();
+
+    const delay = Math.min(700 + replyText.length * 8, 2000);
+
+    setTimeout(() => {
+        t.remove();
+        const b = document.createElement('div');
+        b.className = 'chat-bubble bot';
+        b.innerHTML = fmt(replyText);
+        msgBox.appendChild(b);
+
+        if(chips && chips.length > 0){
+            const row = document.createElement('div');
+            row.className = 'quick-replies';
+            chips.forEach(label => {
+                const chip = document.createElement('button');
+                chip.className = 'quick-chip';
+                chip.textContent = label;
+                chip.addEventListener('click', () => {
+                    row.remove();
+                    if(CHIP_ACTIONS[label]){
+                        CHIP_ACTIONS[label]();
+                        addBubble(label, 'user');
+                        showTyping(`Opening ${label} for you...`, []);
+                    } else {
+                        addBubble(label, 'user');
+                        const lo = label.toLowerCase();
+                        let m = null;
+                        for(const rule of REPLIES){
+                            if(rule.keys.some(k => lo.includes(k))){ m = rule; break; }
+                        }
+                        const r = m || FALLBACK;
+                        showTyping(r.reply, r.chips || []);
+                    }
+                });
+                row.appendChild(chip);
+            });
+            msgBox.appendChild(row);
+        }
+        scrollDown();
+    }, delay);
+}
+
+function fmt(text){
+    return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+}
+
+function scrollDown(){
+    msgBox.scrollTop = msgBox.scrollHeight;
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,413 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+:root {
+    --green: #16a34a;
+    --green-dark: #15803d;
+    --green-light: #f0fdf4;
+    --surface: #ffffff;
+    --bg: #f1f5f9;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --danger: #ef4444;
+    --danger-bg: #fef2f2;
+    --radius: 14px;
+}
+
+body {
+    background: var(--bg);
+    font-family: 'Poppins', sans-serif;
+    color: var(--text);
+}
+
+.register-wrapper {
+    min-height: 92vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+}
+
+.register-card {
+    background: var(--surface);
+    border-radius: 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.10);
+    padding: 48px 44px;
+    width: 100%;
+    max-width: 480px;
+}
+
+.register-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+.register-subtitle {
+    font-size: 0.83rem;
+    color: var(--muted);
+    margin-bottom: 28px;
+    text-align: center;
+}
+
+/* ── ALERTS ── */
+.alert-custom {
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.82rem;
+    margin-bottom: 18px;
+}
+
+.alert-danger-custom {
+    background: var(--danger-bg);
+    border-left: 3px solid var(--danger);
+    color: #b91c1c;
+}
+
+.alert-success-custom {
+    background: var(--green-light);
+    border-left: 3px solid var(--green);
+    color: var(--green-dark);
+}
+
+/* ── NAME ROW ── */
+.name-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* ── FORM GROUP ── */
+.form-group { margin-bottom: 16px; }
+
+.form-label-custom {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.input-wrap { position: relative; }
+
+.input-icon {
+    position: absolute;
+    left: 13px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 15px;
+    pointer-events: none;
+}
+
+.form-input {
+    width: 100%;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 11px 14px 11px 38px;
+    font-size: 0.875rem;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(22,163,74,0.12);
+}
+
+.form-input::placeholder { color: #b0bec5; }
+
+.eye-btn {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    color: var(--muted); cursor: pointer;
+    font-size: 15px; padding: 0;
+    display: flex; align-items: center;
+    transition: color 0.2s;
+}
+
+.eye-btn:hover { color: var(--text); }
+
+.input-hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+/* ── STRENGTH BAR ── */
+.strength-bar-wrap {
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.strength-bar {
+    height: 100%;
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.3s, background 0.3s;
+}
+
+.strength-label {
+    font-size: 0.7rem;
+    margin-top: 4px;
+    font-weight: 600;
+}
+
+/* ── SUBMIT ── */
+.submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    border: none;
+    border-radius: var(--radius);
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 13px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: 0.25s;
+    box-shadow: 0 4px 14px rgba(22,163,74,0.25);
+    display: flex; align-items: center;
+    justify-content: center; gap: 8px;
+    margin-top: 6px;
+}
+
+.submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(22,163,74,0.35);
+}
+
+.submit-btn:disabled {
+    background: #cbd5e1;
+    box-shadow: none; cursor: not-allowed;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+
+.login-link a {
+    color: var(--green-dark);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.login-link a:hover { text-decoration: underline; }
+
+@media (max-width: 520px) {
+    .register-card { padding: 32px 22px; }
+    .name-row { grid-template-columns: 1fr; gap: 0; }
+    .register-title { font-size: 1.35rem; }
+}
+</style>
+
+<div class="register-wrapper">
+    <div class="register-card">
+
+        <div class="register-title">Create Account 👋</div>
+        <div class="register-subtitle">Join DesiKnot — free & takes 30 seconds</div>
+
+        <!-- ERRORS -->
+        {% if form.errors %}
+        <div class="alert-custom alert-danger-custom">
+            <ul class="mb-0 ps-3">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ error|escape }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error|escape }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert-custom {% if message.tags == 'success' %}alert-success-custom{% else %}alert-danger-custom{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" autocomplete="off" id="registerForm">
+            {% csrf_token %}
+
+            <!-- NAME -->
+            <div class="name-row">
+                <div class="form-group">
+                    <label class="form-label-custom">First Name</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-person input-icon"></i>
+                        <input type="text" class="form-input" name="first_name"
+                               placeholder="Ram" autocomplete="given-name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label-custom">Last Name</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-person input-icon"></i>
+                        <input type="text" class="form-input" name="last_name"
+                               placeholder="Shrestha" autocomplete="family-name" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EMAIL -->
+            <div class="form-group">
+                <label class="form-label-custom">Email Address</label>
+                <div class="input-wrap">
+                    <i class="bi bi-envelope input-icon"></i>
+                    <input type="email" class="form-input" name="email"
+                           placeholder="you@example.com" autocomplete="off" required>
+                </div>
+            </div>
+
+            <!-- USERNAME -->
+            <div class="form-group">
+                <label class="form-label-custom">Username</label>
+                <div class="input-wrap">
+                    <i class="bi bi-at input-icon"></i>
+                    <input type="text" class="form-input" name="username"
+                           placeholder="ram_shrestha123" autocomplete="off"
+                           pattern="^[a-z0-9_]+$"
+                           oninput="this.value=this.value.toLowerCase(); checkUsername(this)"
+                           required>
+                </div>
+                <div class="input-hint">Lowercase letters, numbers and underscore only</div>
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="form-group">
+                <label class="form-label-custom">Password</label>
+                <div class="input-wrap">
+                    <i class="bi bi-lock input-icon"></i>
+                    <input type="password" class="form-input" id="password1"
+                           name="password1" placeholder="Create a strong password"
+                           autocomplete="new-password"
+                           oninput="checkStrength(this.value)" required>
+                    <button type="button" class="eye-btn" onclick="togglePass('password1','icon1')">
+                        <i class="bi bi-eye-fill" id="icon1"></i>
+                    </button>
+                </div>
+                <div class="strength-bar-wrap">
+                    <div class="strength-bar" id="strengthBar"></div>
+                </div>
+                <div class="strength-label" id="strengthLabel" style="color:var(--muted);"></div>
+            </div>
+
+            <!-- CONFIRM PASSWORD -->
+            <div class="form-group">
+                <label class="form-label-custom">Confirm Password</label>
+                <div class="input-wrap">
+                    <i class="bi bi-lock-fill input-icon"></i>
+                    <input type="password" class="form-input" id="password2"
+                           name="password2" placeholder="Repeat your password"
+                           autocomplete="new-password"
+                           oninput="checkMatch()" required>
+                    <button type="button" class="eye-btn" onclick="togglePass('password2','icon2')">
+                        <i class="bi bi-eye-fill" id="icon2"></i>
+                    </button>
+                </div>
+                <div class="input-hint" id="matchHint"></div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span>Create My Account</span>
+                <i class="bi bi-arrow-right"></i>
+            </button>
+
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="{% url 'login' %}">Log in here</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function togglePass(fieldId, iconId) {
+    const f = document.getElementById(fieldId);
+    const i = document.getElementById(iconId);
+    if (f.type === 'password') {
+        f.type = 'text';
+        i.className = 'bi bi-eye-slash-fill';
+    } else {
+        f.type = 'password';
+        i.className = 'bi bi-eye-fill';
+    }
+}
+
+function checkStrength(val) {
+    const bar   = document.getElementById('strengthBar');
+    const label = document.getElementById('strengthLabel');
+    let score = 0;
+    if (val.length >= 8)            score++;
+    if (/[A-Z]/.test(val))         score++;
+    if (/[0-9]/.test(val))         score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+
+    const levels = [
+        { pct: '0%',   color: '',        text: '' },
+        { pct: '25%',  color: '#ef4444', text: 'Weak' },
+        { pct: '50%',  color: '#f59e0b', text: 'Fair' },
+        { pct: '75%',  color: '#3b82f6', text: 'Good' },
+        { pct: '100%', color: '#16a34a', text: 'Strong 💪' },
+    ];
+
+    const lvl = levels[score];
+    bar.style.width      = lvl.pct;
+    bar.style.background = lvl.color;
+    label.textContent    = lvl.text;
+    label.style.color    = lvl.color;
+    checkMatch();
+}
+
+function checkMatch() {
+    const p1   = document.getElementById('password1').value;
+    const p2   = document.getElementById('password2').value;
+    const hint = document.getElementById('matchHint');
+    if (!p2) { hint.textContent = ''; return; }
+    if (p1 === p2) {
+        hint.textContent = '✓ Passwords match';
+        hint.style.color = '#16a34a';
+    } else {
+        hint.textContent = '✗ Passwords do not match';
+        hint.style.color = '#ef4444';
+    }
+}
+
+function checkUsername(input) {
+    const valid = /^[a-z0-9_]+$/.test(input.value);
+    input.style.borderColor = input.value ? (valid ? '#16a34a' : '#ef4444') : '';
+}
+
+document.getElementById('registerForm').addEventListener('submit', function () {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = `
+        <span class="spinner-border spinner-border-sm" role="status"></span>
+        <span>Creating account...</span>
+    `;
+});
+</script>
+
+{% endblock %}

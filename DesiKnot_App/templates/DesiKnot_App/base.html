@@ -1,0 +1,460 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DesiKnot</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+    --bg:#ffffff;
+    --text:#222;
+    --card:#ffffff;
+    --nav:linear-gradient(135deg,#1f8f4a,#136f38);
+    --footer:linear-gradient(135deg,#0f3d2e,#145c42);
+    --accent:#FFD700;
+}
+
+body.dark-mode{
+    --bg:#121212;
+    --text:#f1f1f1;
+    --card:#1e1e1e;
+    --nav:linear-gradient(135deg,#1b1b1b,#2c2c2c);
+    --footer:#111;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    margin:0;
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+    transition:0.3s ease;
+}
+
+.navbar{
+    background:var(--nav);
+    padding:14px 0;
+    box-shadow:0 4px 18px rgba(0,0,0,0.15);
+    z-index:999;
+}
+
+.navbar-brand{
+    font-weight:700;
+    font-size:24px;
+    color:#fff !important;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.logo{
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    object-fit:cover;
+    transition:0.3s;
+}
+
+.logo:hover{
+    transform:scale(1.08);
+}
+
+.navbar-nav{
+    gap:6px;
+}
+
+.nav-link{
+    color:#fff !important;
+    font-weight:500;
+    font-size:15px;
+    padding:10px 16px !important;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition:all 0.3s ease;
+    position:relative;
+}
+
+.nav-link::after{
+    display:none !important;
+}
+
+.nav-link:hover{
+    background:rgba(255,255,255,0.12);
+    color:var(--accent) !important;
+    transform:translateY(-1px);
+}
+
+.nav-link.active{
+    background:rgba(255,255,255,0.15);
+    color:var(--accent) !important;
+}
+
+.nav-link i{
+    font-size:16px;
+}
+
+.dropdown-menu{
+    border:none;
+    border-radius:14px;
+    overflow:hidden;
+    padding:10px;
+    margin-top:12px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.18);
+    animation:dropdownFade 0.25s ease;
+}
+
+@keyframes dropdownFade{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.dropdown-item{
+    border-radius:10px;
+    padding:10px 14px;
+    font-weight:500;
+    transition:0.3s;
+}
+
+.dropdown-item:hover{
+    background:#f3f3f3;
+    color:#136f38;
+    transform:translateX(3px);
+}
+
+.user-avatar{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:var(--accent);
+    color:#145c42;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:15px;
+}
+
+.dark-toggle{
+    cursor:pointer;
+}
+
+.content-wrapper{
+    flex:1;
+    padding:25px 0;
+}
+
+.footer{
+    background:var(--footer);
+    color:white;
+    text-align:center;
+    padding:22px 0;
+    margin-top:auto;
+}
+
+.footer h5{
+    font-weight:700;
+    margin-bottom:8px;
+}
+
+.footer p{
+    margin:3px 0;
+}
+
+@media(max-width:991px){
+    .navbar-nav{
+        margin-top:15px;
+    }
+    .nav-link{
+        width:100%;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+
+<div class="container">
+
+    <a class="navbar-brand" href="{% url 'logo_view' %}">
+        <img src="{% static 'images/logo.JPG' %}" class="logo" alt="Logo">
+        DesiKnot
+    </a>
+
+    <button class="navbar-toggler" type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+
+        <ul class="navbar-nav align-items-lg-center">
+
+            <!-- HOME -->
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/' %}active{% endif %}"
+                   href="{% url 'home' %}">
+                    <i class="bi bi-house-door-fill"></i>
+                    Home
+                </a>
+            </li>
+
+            <!-- CART -->
+            <li class="nav-item">
+                <a class="nav-link {% if 'cart' in request.path %}active{% endif %}"
+                   href="{% url 'cart' %}">
+                    <i class="bi bi-cart-fill"></i>
+                    Cart
+                </a>
+            </li>
+
+            <!-- CATEGORIES -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle {% if 'category' in request.path %}active{% endif %}"
+                   href="#"
+                   role="button"
+                   data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                    <i class="bi bi-grid-fill"></i>
+                    Categories
+                </a>
+                <ul class="dropdown-menu">
+                    {% for cat in categories %}
+                    {% if cat.slug %}
+                    <li>
+                        <a class="dropdown-item" href="{% url 'category_products' cat.slug %}">
+                            {% if cat.name == "Ethnic Wear" %}
+                                <i class="bi bi-bag-heart me-2"></i>
+                            {% elif cat.name == "Western Wear" %}
+                                <i class="bi bi-handbag me-2"></i>
+                            {% elif cat.name == "Skirts and Dress" %}
+                                <i class="bi bi-stars me-2"></i>
+                            {% else %}
+                                <i class="bi bi-grid me-2"></i>
+                            {% endif %}
+                            {{ cat.name }}
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+            </li>
+
+            <!-- CUSTOM ORDER -->
+            <li class="nav-item">
+                <a class="nav-link {% if 'custom' in request.path %}active{% endif %}"
+                   href="{% url 'custom_order_step1' %}">
+                    <i class="bi bi-pencil-square"></i>
+                    Custom Order
+                </a>
+            </li>
+
+            <!-- ABOUT -->
+            <li class="nav-item">
+                <a class="nav-link {% if 'about' in request.path %}active{% endif %}"
+                   href="{% url 'about' %}">
+                    <i class="bi bi-info-circle-fill"></i>
+                    About
+                </a>
+            </li>
+
+            <!-- CHAT -->
+            <li class="nav-item">
+                <a class="nav-link {% if 'messages' in request.path %}active{% endif %}"
+                   href="{% url 'user_messages' %}">
+                    <i class="bi bi-chat-dots-fill"></i>
+                    Chat
+                    {% if unread_messages_count %}
+                    <span class="badge bg-danger ms-1">
+                        {{ unread_messages_count }}
+                    </span>
+                    {% endif %}
+                </a>
+            </li>
+
+            <!-- DARK MODE -->
+            <li class="nav-item">
+                <span class="nav-link dark-toggle" onclick="toggleDarkMode()">
+                    <i class="bi bi-moon-fill" id="darkIcon"></i>
+                </span>
+            </li>
+
+                        
+
+                        {% if request.user.is_authenticated and request.user.profile.role == 'owner' %}
+
+            <li class="nav-item">
+                <a class="nav-link {% if 'accounting' in request.path %}active{% endif %}"
+                   href="{% url 'accounting_dashboard' %}">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    Accounting
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {% if 'user-activity' in request.path %}active{% endif %}"
+                   href="{% url 'user_activity_dashboard' %}">
+                    <i class="bi bi-people-fill"></i>
+                    User Activity
+                </a>
+            </li>
+
+            {% endif %}
+
+            
+            <!-- USER -->
+            {% if request.user.is_authenticated %}
+
+            <li class="nav-item dropdown">
+
+                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2"
+                   href="#"
+                   data-bs-toggle="dropdown">
+                    <div class="user-avatar">
+                        {{ request.user.username|slice:":1"|upper }}
+                    </div>
+                    <span>
+                        {% if request.user.is_superuser %}
+                            Admin
+                        {% elif request.user.profile and request.user.profile.role == 'owner' %}
+                            Owner
+                        {% else %}
+                            Account
+                        {% endif %}
+                    </span>
+                </a>
+
+                <ul class="dropdown-menu dropdown-menu-end">
+
+                    <li>
+                        <a class="dropdown-item" href="{% url 'profile' %}">
+                            <i class="bi bi-person me-2"></i>
+                            Profile
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item d-flex justify-content-between align-items-center"
+                           href="{% url 'wishlist' %}">
+                            <span>
+                                <i class="bi bi-heart-fill me-2"></i>
+                                Wishlist
+                            </span>
+                            {% if wishlist_count %}
+                            <span class="badge bg-danger rounded-pill">
+                                {{ wishlist_count }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+
+                    <!-- ✅ ORDERS — owner goes to owners_orders, users go to my_orders -->
+                    <li>
+                        <a class="dropdown-item d-flex justify-content-between align-items-center"
+                           href="{% if request.user.profile.role == 'owner' %}{% url 'owners_orders' %}{% else %}{% url 'my_orders' %}{% endif %}">
+                            <span>
+                                <i class="bi bi-bag-check me-2"></i>
+                                Orders
+                            </span>
+                            {% if order_notifications_count %}
+                            <span class="badge bg-danger rounded-pill">
+                                {{ order_notifications_count }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+
+                    <li><hr class="dropdown-divider"></li>
+
+                    <li>
+                        <form method="POST" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button class="dropdown-item text-danger">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                Logout
+                            </button>
+                        </form>
+                    </li>
+
+                </ul>
+
+            </li>
+
+            {% else %}
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    Login
+                </a>
+            </li>
+
+            {% endif %}
+
+        </ul>
+
+    </div>
+
+</div>
+
+</nav>
+
+<div class="container content-wrapper">
+    {% block content %}
+    {% endblock %}
+</div>
+
+<footer class="footer">
+    <h5>DesiKnot</h5>
+    <p>Connecting tradition with modern fashion</p>
+    <p>© 2026 DesiKnot. All Rights Reserved.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function toggleDarkMode(){
+    document.body.classList.toggle("dark-mode");
+    if(document.body.classList.contains("dark-mode")){
+        localStorage.setItem("theme","dark");
+        document.getElementById("darkIcon").className = "bi bi-sun-fill";
+    } else {
+        localStorage.setItem("theme","light");
+        document.getElementById("darkIcon").className = "bi bi-moon-fill";
+    }
+}
+
+window.onload = function(){
+    if(localStorage.getItem("theme") === "dark"){
+        document.body.classList.add("dark-mode");
+        document.getElementById("darkIcon").className = "bi bi-sun-fill";
+    }
+}
+</script>
+
+</body>
+</html>

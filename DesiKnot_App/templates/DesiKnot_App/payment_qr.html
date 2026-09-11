@@ -1,0 +1,575 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+/* ==========================================================================
+   GLOBAL STYLE VARS & RESET
+   ========================================================================== */
+:root {
+    --esewa-green: #60bb46;
+    --esewa-gradient: linear-gradient(135deg, #60bb46, #419628);
+    --bank-blue: #1a56db;
+    --bank-gradient: linear-gradient(135deg, #2563eb, #1a3fa8);
+    --surface-card: #ffffff;
+    --background-muted: #f8fafc;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --accent-warning-bg: #fffbeb;
+    --accent-warning-border: #fef3c7;
+    --accent-warning-text: #b45309;
+}
+
+body {
+    background-color: var(--background-muted);
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-main);
+}
+
+/* ==========================================================================
+   FLOATING BACK BUTTON (NEW)
+   ========================================================================== */
+.floating-back-btn{
+    position: fixed;
+    top: 90px;
+    left: 10px;
+    z-index: 99999;
+
+    background: #ffffff;
+    color: #333;
+    padding: 10px 16px;
+    border-radius: 12px;
+
+    font-weight: 600;
+    text-decoration: none;
+
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    border: 1px solid #eee;
+
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.floating-back-btn.hide{
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   LAYOUT MATRICES
+   ========================================================================== */
+.qr-container-card {
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    background-color: var(--surface-card);
+    box-shadow: 0 15px 40px rgba(15, 23, 42, 0.04);
+    max-width: 680px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.brand-header-strip {
+    background: var(--esewa-gradient);
+    color: white;
+    padding: 24px;
+    text-align: center;
+    transition: background 0.35s ease;
+}
+
+.brand-header-strip.bank-active {
+    background: var(--bank-gradient);
+}
+
+.brand-header-strip h2 {
+    font-weight: 800;
+    font-size: 1.75rem;
+    letter-spacing: -0.5px;
+}
+
+/* ==========================================================================
+   SPLIT INFORMATION GRID
+   ========================================================================== */
+.summary-data-box {
+    background-color: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 18px;
+}
+
+.summary-data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed var(--border-color);
+    font-size: 0.95rem;
+}
+
+.summary-data-row:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Dual-Pay Flex Breakdown */
+.pricing-option-pill {
+    background: #fff;
+    border: 2px solid var(--border-color);
+    border-radius: 14px;
+    padding: 14px;
+    height: 100%;
+    transition: border-color 0.2s ease;
+}
+.pricing-option-pill.highlighted {
+    border-color: var(--esewa-green);
+    background-color: rgba(96, 187, 70, 0.03);
+}
+
+/* ==========================================================================
+   PAYMENT METHOD SELECTOR
+   ========================================================================== */
+.method-selector {
+    display: flex;
+    gap: 12px;
+    background: #f1f5f9;
+    padding: 6px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+}
+
+.method-tab {
+    flex: 1;
+    text-align: center;
+    padding: 14px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    user-select: none;
+    border: 2px solid transparent;
+}
+
+.method-tab .method-icon {
+    font-size: 1.2rem;
+}
+
+.method-tab.esewa-tab.active {
+    background: #fff;
+    color: var(--esewa-green);
+    border-color: var(--esewa-green);
+    box-shadow: 0 4px 14px rgba(96, 187, 70, 0.15);
+}
+
+.method-tab.bank-tab.active {
+    background: #fff;
+    color: var(--bank-blue);
+    border-color: var(--bank-blue);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
+}
+
+.method-panel {
+    display: none;
+}
+
+.method-panel.active {
+    display: block;
+    animation: fadeInPanel 0.3s ease;
+}
+
+@keyframes fadeInPanel {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.bank-details-box {
+    background: #eff4ff;
+    border: 1px solid #dbe6ff;
+    border-radius: 14px;
+    padding: 16px 18px;
+    text-align: left;
+    margin-top: 14px;
+}
+
+.bank-details-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 0.9rem;
+    border-bottom: 1px dashed #dbe6ff;
+}
+
+.bank-details-row:last-child {
+    border-bottom: none;
+}
+
+.bank-details-row span:first-child {
+    color: var(--text-muted);
+}
+
+.bank-details-row span:last-child {
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* ==========================================================================
+   QR ELEMENT FRAMEWORKS
+   ========================================================================== */
+.qr-wrapper {
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    padding: 16px;
+    display: inline-block;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.02);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+}
+
+.qr-wrapper.esewa-border:hover {
+    transform: scale(1.02);
+    border-color: var(--esewa-green);
+}
+
+.qr-wrapper.bank-border:hover {
+    transform: scale(1.02);
+    border-color: var(--bank-blue);
+}
+
+.qr-frame-img {
+    width: 220px;
+    height: 220px;
+    object-fit: contain;
+    display: block;
+}
+
+/* Policy Warnings styling */
+.policy-alert-banner {
+    background-color: var(--accent-warning-bg);
+    border: 1px solid var(--accent-warning-border);
+    color: var(--accent-warning-text);
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    text-align: left;
+}
+
+/* ==========================================================================
+   SCREENSHOT CAPTURE UPLOAD MODULE
+   ========================================================================== */
+.file-upload-dropzone {
+    border: 2px dashed #cbd5e1;
+    background-color: #f8fafc;
+    border-radius: 14px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.file-upload-dropzone:hover {
+    border-color: var(--esewa-green);
+    background-color: #fff;
+}
+
+.file-upload-input {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   INTERACTION ENGINES
+   ========================================================================== */
+.action-submit-btn {
+    background: var(--esewa-gradient);
+    border: none;
+    padding: 14px 28px;
+    border-radius: 14px;
+    color: white;
+    font-weight: 700;
+    font-size: 1.05rem;
+    box-shadow: 0 4px 12px rgba(96, 187, 70, 0.2);
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.action-submit-btn.bank-btn {
+    background: var(--bank-gradient);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.action-submit-btn:hover {
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(96, 187, 70, 0.35);
+    filter: brightness(1.05);
+}
+
+.action-submit-btn.bank-btn:hover {
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+}
+
+.secondary-nav-link {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.secondary-nav-link:hover {
+    color: var(--text-main);
+}
+</style>
+
+<a href="javascript:history.back()" id="backBtn" class="floating-back-btn">
+    ← Back
+</a>
+
+<div class="container py-5">
+    <div class="card qr-container-card">
+
+        <div class="brand-header-strip" id="brandHeaderStrip">
+            <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+                <span id="headerIcon">🟢</span>
+                <h2 class="m-0" id="headerTitle">eSewa Merchant Payment Portal</h2>
+            </div>
+            <p class="m-0 opacity-90 small">Order saved successfully under internal temporary state tracker</p>
+        </div>
+
+        <div class="p-4 p-sm-5 text-center">
+
+            <div class="summary-data-box mb-4">
+                <div class="summary-data-row">
+                    <span class="text-muted font-medium">Tracking Order Reference</span>
+                    <strong class="text-dark">#DK-{{ order.id }}</strong>
+                </div>
+                <div class="summary-data-row">
+                    <span class="text-muted">Verification Status</span>
+                    <span class="badge bg-warning text-dark fw-bold px-2 py-1 rounded-pill" style="font-size: 0.78rem;">
+                        ⏳ Pending Document Verification
+                    </span>
+                </div>
+            </div>
+
+            <h5 class="text-start fw-bold mb-3" style="font-size: 1rem; color: var(--text-main);">Payment Summary:</h5>
+
+            {% if is_cod %}
+            <div class="mb-4 text-start">
+                <div class="pricing-option-pill highlighted">
+                    <span class="text-muted small d-block fw-bold mb-1">PAY NOW — ADVANCE SHIPPING FEE</span>
+                    <h4 class="fw-bold text-success m-0">Rs {{ order.shipping_cost|floatformat:2 }}</h4>
+                    <p class="text-muted small m-0 mt-1" style="line-height: 1.4;">
+                        Upload proof of this shipping payment. Your items will be paid in cash when they arrive at your door.
+                    </p>
+                </div>
+            </div>
+            {% else %}
+            <div class="row g-3 mb-4 text-start">
+                <div class="col-sm-6">
+                    <div class="pricing-option-pill highlighted">
+                        <span class="text-muted small d-block fw-bold mb-1">OPTION 1: ADVANCE SHIPPING ONLY</span>
+                        <h4 class="fw-bold text-success m-0">Rs 120 {{ order.shipping_cost|floatformat:2 }}</h4>
+                        <p class="text-muted small m-0 mt-1" style="line-height: 1.4;">Pay only the delivery fee right now. Pay the rest in cash at your door during item arrival.</p>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="pricing-option-pill">
+                        <span class="text-muted small d-block fw-bold mb-1">OPTION 2: COMPLETE FULL VALUE</span>
+                        <h4 class="fw-bold text-dark m-0">Rs {{ order.total_amount|floatformat:2 }}</h4>
+                        <p class="text-muted small m-0 mt-1" style="line-height: 1.4;">Pay the entire product value + delivery fee together right now to skip cash handling later.</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ============================
+                 PAYMENT METHOD SELECTOR
+            ============================= -->
+            <h5 class="text-start fw-bold mb-2" style="font-size: 1rem; color: var(--text-main);">Choose Payment Method:</h5>
+
+            <div class="method-selector">
+                <div class="method-tab esewa-tab active" id="esewaTabBtn" onclick="selectMethod('esewa')">
+                    <span class="method-icon">🟢</span> eSewa
+                </div>
+                <div class="method-tab bank-tab" id="bankTabBtn" onclick="selectMethod('bank')">
+                    <span class="method-icon">🏦</span> Bank Transfer
+                </div>
+            </div>
+
+            <!-- ESEWA PANEL -->
+            <div class="method-panel active" id="esewaPanel">
+                <div class="my-3">
+                    <div class="qr-wrapper esewa-border">
+                        <img src="{% static 'images/qr/esewa_qr.png' %}" class="qr-frame-img" alt="DesiKnot eSewa QR Code">
+                    </div>
+                    <div class="text-muted small mt-2">
+                        📱 Open eSewa App → Scan QR Code → Execute Transaction
+                    </div>
+                </div>
+            </div>
+
+            <!-- BANK PANEL -->
+            <div class="method-panel" id="bankPanel">
+                <div class="my-3">
+                    <div class="qr-wrapper bank-border">
+                        <!-- 👇 Update this filename if your bank QR image is named differently -->
+                        <img src="{% static 'images/qr/bank_qr.png' %}" class="qr-frame-img" alt="DesiKnot Bank Transfer QR Code">
+                    </div>
+                    <div class="text-muted small mt-2">
+                        🏦 Open your Mobile Banking App → Scan QR Code → Complete Transfer
+                    </div>
+                </div>
+
+                <div class="bank-details-box">
+                    <div class="bank-details-row">
+                        <span>Account Name</span>
+                        <span>Yubraj Karki</span>
+                    </div>
+                    <div class="bank-details-row">
+                        <span>Account Number</span>
+                        <span>0450199289800012</span>
+                    </div>
+                    <div class="bank-details-row">
+                        <span>Bank Name</span>
+                        <span>Prabhu Bank Limited</span>
+                    </div>
+                    <div class="bank-details-row">
+                        <span>Branch</span>
+                        <span>Shankhamul, Kathmandu</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="policy-alert-banner my-4">
+                <div class="d-flex gap-2 align-items-start">
+                    <span class="fs-5">⚠️</span>
+                    <div>
+                        <strong>Manual Verification Guard:</strong> Our management team tracks physical records before dispatching units. You must upload a clear screenshot of the completed transaction below so we can move your order from <strong>Pending</strong> to <strong>Approved</strong>.
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" action="" id="qrUploadForm" class="text-start mb-4">
+                {% csrf_token %}
+
+                <!-- Records which method the customer chose, for the owner's reference -->
+                <input type="hidden" name="payment_gateway" id="paymentGatewayInput" value="esewa">
+
+                <label class="form-label fw-bold text-dark mb-2" style="font-size: 0.95rem;">Upload Payment Receipt Screenshot</label>
+                <div class="file-upload-dropzone text-center" id="dropzoneContainer">
+                    <span class="fs-2 d-block mb-1">📸</span>
+                    <strong class="text-dark small d-block mb-1" id="uploadFilenameDisplay">Click to browse or drop screenshot image file here</strong>
+                    <span class="text-muted d-block" style="font-size: 0.8rem;">Supports PNG, JPG, or JPEG formats up to 4MB max</span>
+                    <input type="file" name="qr_screenshot" class="file-upload-input" id="screenshotInput" accept="image/*" required>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn action-submit-btn w-100 py-3" id="submitReceiptBtn">
+                        Submit Proof & Lock Order Delivery
+                    </button>
+                </div>
+            </form>
+
+
+            <div class="mt-3">
+                <a href="{% url 'payment_qr' order.id %}?skip=1" class="secondary-nav-link d-inline-flex align-items-center gap-1">
+                    ← Back to Homepage
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function selectMethod(method) {
+    const esewaTab = document.getElementById('esewaTabBtn');
+    const bankTab = document.getElementById('bankTabBtn');
+    const esewaPanel = document.getElementById('esewaPanel');
+    const bankPanel = document.getElementById('bankPanel');
+    const header = document.getElementById('brandHeaderStrip');
+    const headerIcon = document.getElementById('headerIcon');
+    const headerTitle = document.getElementById('headerTitle');
+    const submitBtn = document.getElementById('submitReceiptBtn');
+    const gatewayInput = document.getElementById('paymentGatewayInput');
+
+    if (method === 'esewa') {
+        esewaTab.classList.add('active');
+        bankTab.classList.remove('active');
+        esewaPanel.classList.add('active');
+        bankPanel.classList.remove('active');
+        header.classList.remove('bank-active');
+        headerIcon.textContent = '🟢';
+        headerTitle.textContent = 'eSewa Merchant Payment Portal';
+        submitBtn.classList.remove('bank-btn');
+        gatewayInput.value = 'esewa';
+    } else {
+        bankTab.classList.add('active');
+        esewaTab.classList.remove('active');
+        bankPanel.classList.add('active');
+        esewaPanel.classList.remove('active');
+        header.classList.add('bank-active');
+        headerIcon.textContent = '🏦';
+        headerTitle.textContent = 'Bank Transfer Payment Portal';
+        submitBtn.classList.add('bank-btn');
+        gatewayInput.value = 'bank';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const fileInputField = document.getElementById('screenshotInput');
+    const displayLabelMessage = document.getElementById('uploadFilenameDisplay');
+    const interactiveDropzone = document.getElementById('dropzoneContainer');
+    const uploadForm = document.getElementById('qrUploadForm');
+    const submitBtn = document.getElementById('submitReceiptBtn');
+
+    if (fileInputField) {
+        fileInputField.addEventListener('change', function (e) {
+            if (this.files && this.files.length > 0) {
+                const selectedFile = this.files[0];
+                displayLabelMessage.innerHTML = `✅ Selected: <strong>${selectedFile.name}</strong>`;
+                interactiveDropzone.style.borderColor = "var(--esewa-green)";
+                interactiveDropzone.style.backgroundColor = "rgba(96, 187, 70, 0.02)";
+            }
+        });
+    }
+
+    if (uploadForm && submitBtn) {
+        uploadForm.addEventListener('submit', function () {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Uploading Verification Assets...
+            `;
+        });
+    }
+
+    // Floating back button — hides while scrolling, reappears when scrolling stops
+    let backBtn = document.getElementById("backBtn");
+    let scrollTimer;
+
+    if (backBtn) {
+        window.addEventListener("scroll", function () {
+            backBtn.classList.add("hide");
+            clearTimeout(scrollTimer);
+            scrollTimer = setTimeout(function () {
+                backBtn.classList.remove("hide");
+            }, 700);
+        });
+    }
+});
+</script>
+
+{% endblock %}

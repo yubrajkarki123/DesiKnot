@@ -1,0 +1,433 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+
+body{
+    background:#f4f7fb;
+}
+
+/* ==========================
+        PAGE HEADER
+========================== */
+
+.ledger-header{
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    color:#fff;
+    border-radius:24px;
+    padding:35px;
+    margin-bottom:30px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 20px 40px rgba(15,23,42,.15);
+}
+
+.ledger-header::before{
+    content:"";
+    position:absolute;
+    right:-60px;
+    top:-60px;
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    background:rgba(255,255,255,.08);
+}
+
+.ledger-header::after{
+    content:"";
+    position:absolute;
+    left:-50px;
+    bottom:-50px;
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    background:rgba(255,255,255,.05);
+}
+
+.ledger-title{
+    font-size:2rem;
+    font-weight:700;
+}
+
+.ledger-subtitle{
+    color:rgba(255,255,255,.75);
+    margin-top:6px;
+}
+
+/* ==========================
+        BUTTONS
+========================== */
+
+.header-buttons{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.btn-custom{
+    border:none;
+    border-radius:12px;
+    padding:10px 18px;
+    font-weight:600;
+    transition:.3s;
+    text-decoration:none;
+}
+
+.btn-dashboard{
+    background:#ffffff;
+    color:#111827;
+}
+
+.btn-dashboard:hover{
+    background:#f3f4f6;
+    transform:translateY(-2px);
+}
+
+.btn-expense{
+    background:#198754;
+    color:#fff;
+}
+
+.btn-expense:hover{
+    background:#157347;
+    color:#fff;
+    transform:translateY(-2px);
+}
+
+.btn-export{
+    background:#0ea5e9;
+    color:#fff;
+}
+
+.btn-export:hover{
+    background:#0284c7;
+    color:#fff;
+    transform:translateY(-2px);
+}
+
+/* ==========================
+        CARD
+========================== */
+
+.ledger-card{
+    background:#fff;
+    border:none;
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 15px 40px rgba(15,23,42,.08);
+}
+
+/* ==========================
+        TABLE
+========================== */
+
+.ledger-table{
+    margin:0;
+}
+
+.ledger-table thead{
+    background:#f8fafc;
+}
+
+.ledger-table th{
+    border:none;
+    padding:18px;
+    color:#64748b;
+    font-size:.82rem;
+    text-transform:uppercase;
+    letter-spacing:.8px;
+    font-weight:700;
+}
+
+.ledger-table td{
+    border-top:1px solid #edf2f7;
+    padding:18px;
+    vertical-align:middle;
+}
+
+.ledger-table tbody tr{
+    transition:.25s;
+}
+
+.ledger-table tbody tr:hover{
+    background:#f8fbff;
+}
+
+/* ==========================
+        BADGES
+========================== */
+
+.badge-credit{
+    display:inline-block;
+    background:#dcfce7;
+    color:#15803d;
+    padding:7px 14px;
+    border-radius:30px;
+    font-size:.82rem;
+    font-weight:700;
+}
+
+.badge-debit{
+    display:inline-block;
+    background:#fee2e2;
+    color:#dc2626;
+    padding:7px 14px;
+    border-radius:30px;
+    font-size:.82rem;
+    font-weight:700;
+}
+
+.status-badge{
+    background:#eef2ff;
+    color:#4338ca;
+    padding:6px 12px;
+    border-radius:30px;
+    font-size:.78rem;
+    font-weight:600;
+}
+
+/* ==========================
+        AMOUNT
+========================== */
+
+.amount-credit{
+    color:#16a34a;
+    font-weight:700;
+    font-size:1rem;
+}
+
+.amount-debit{
+    color:#dc2626;
+    font-weight:700;
+    font-size:1rem;
+}
+
+/* ==========================
+        EMPTY
+========================== */
+
+.empty-ledger{
+    padding:70px 30px;
+    text-align:center;
+}
+
+.empty-ledger i{
+    font-size:65px;
+    color:#cbd5e1;
+    margin-bottom:15px;
+}
+
+.empty-ledger h4{
+    font-weight:700;
+    color:#334155;
+}
+
+.empty-ledger p{
+    color:#94a3b8;
+}
+
+/* ==========================
+        RESPONSIVE
+========================== */
+
+@media(max-width:768px){
+
+    .ledger-header{
+        padding:25px;
+    }
+
+    .ledger-title{
+        font-size:1.6rem;
+    }
+
+    .header-buttons{
+        margin-top:20px;
+    }
+
+    .ledger-table th,
+    .ledger-table td{
+        padding:14px;
+    }
+
+}
+
+</style>
+
+<div class="container py-4">
+
+    <!-- Header -->
+
+    <div class="ledger-header">
+
+        <div class="row align-items-center">
+
+            <div class="col-lg-7">
+
+                <div class="ledger-title">
+                    📒 Accounting Ledger
+                </div>
+
+                <div class="ledger-subtitle">
+                    View all income and expense transactions in one organized ledger.
+                </div>
+
+            </div>
+
+            <div class="col-lg-5 text-lg-end mt-4 mt-lg-0">
+
+                <div class="header-buttons justify-content-lg-end">
+
+                    <a href="{% url 'accounting_dashboard' %}" class="btn-custom btn-dashboard">
+                        <i class="fas fa-arrow-left me-2"></i>Dashboard
+                    </a>
+
+                    <a href="{% url 'expense_list' %}" class="btn-custom btn-expense">
+                        <i class="fas fa-wallet me-2"></i>Expenses
+                    </a>
+
+                    <a href="{% url 'export_ledger_excel' %}" class="btn-custom btn-export">
+                        <i class="fas fa-file-excel me-2"></i>Export Excel
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Ledger Card -->
+
+    <div class="ledger-card">
+
+        {% if ledger %}
+
+        <div class="table-responsive">
+
+            <table class="table ledger-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Date</th>
+                        <th>Transaction</th>
+                        <th>Reference</th>
+                        <th>Party</th>
+                        <th>Status</th>
+                        <th class="text-end">Amount</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for entry in ledger %}
+
+                    <tr>
+
+                        <td>
+
+                            <strong>{{ entry.date|date:"d M Y" }}</strong><br>
+
+                            <small class="text-muted">
+                                {{ entry.date|date:"l" }}
+                            </small>
+
+                        </td>
+
+                        <td>
+
+                            {% if entry.is_credit %}
+                                <span class="badge-credit">
+                                    <i class="fas fa-arrow-down me-1"></i>
+                                    {{ entry.type }}
+                                </span>
+                            {% else %}
+                                <span class="badge-debit">
+                                    <i class="fas fa-arrow-up me-1"></i>
+                                    {{ entry.type }}
+                                </span>
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <strong>{{ entry.reference }}</strong>
+
+                        </td>
+
+                        <td>
+
+                            {{ entry.party }}
+
+                        </td>
+
+                        <td>
+
+                            <span class="status-badge">
+                                {{ entry.status }}
+                            </span>
+
+                        </td>
+
+                        <td class="text-end">
+
+                            {% if entry.is_credit %}
+
+                                <span class="amount-credit">
+                                    + Rs {{ entry.amount|floatformat:2 }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="amount-debit">
+                                    - Rs {{ entry.amount|floatformat:2 }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-ledger">
+
+            <i class="fas fa-book-open"></i>
+
+            <h4>No Ledger Entries Found</h4>
+
+            <p>
+                Your accounting ledger is currently empty.<br>
+                Income and expense transactions will appear here automatically.
+            </p>
+
+            <a href="{% url 'expense_list' %}" class="btn btn-success rounded-pill px-4 mt-2">
+                <i class="fas fa-plus-circle me-2"></i>
+                Manage Expenses
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

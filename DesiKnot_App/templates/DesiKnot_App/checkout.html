@@ -1,0 +1,596 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+:root {
+    --green: #16a34a;
+    --green-dark: #15803d;
+    --green-light: #f0fdf4;
+    --green-border: #bbf7d0;
+    --surface: #ffffff;
+    --bg: #f8fafc;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --warning-bg: #fffbeb;
+    --warning-border: #fde68a;
+    --warning-text: #92400e;
+    --radius: 16px;
+    --radius-sm: 10px;
+}
+
+body {
+    background: var(--bg);
+    font-family: 'Poppins', sans-serif;
+    color: var(--text);
+}
+
+/* ── STEP BAR ── */
+.step-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 36px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.step-circle {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700;
+    background: var(--border); color: var(--muted);
+    transition: 0.3s;
+}
+
+.step.done .step-circle {
+    background: var(--green); color: #fff;
+}
+
+.step.active .step-circle {
+    background: var(--text); color: #fff;
+    box-shadow: 0 0 0 4px rgba(15,23,42,0.12);
+}
+
+.step-label {
+    font-size: 0.72rem; font-weight: 600;
+    color: var(--muted); white-space: nowrap;
+}
+
+.step.active .step-label { color: var(--text); }
+.step.done .step-label  { color: var(--green); }
+
+.step-line {
+    width: 60px; height: 2px;
+    background: var(--border);
+    margin-bottom: 22px;
+}
+
+.step-line.done { background: var(--green); }
+
+/* ── CARDS ── */
+.ck-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+
+.ck-section-title {
+    font-size: 1rem; font-weight: 700;
+    color: var(--text); margin-bottom: 18px;
+    display: flex; align-items: center; gap: 8px;
+}
+
+/* ── ITEM ROW ── */
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--border);
+}
+
+.item-row:last-of-type { border-bottom: none; }
+
+.item-img {
+    width: 52px; height: 52px;
+    border-radius: 10px; object-fit: cover;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.item-name {
+    font-weight: 600; font-size: 0.88rem;
+    color: var(--text); margin-bottom: 2px;
+}
+
+.item-qty {
+    font-size: 0.78rem; color: var(--muted);
+}
+
+.item-price {
+    font-weight: 700; font-size: 0.9rem;
+    color: var(--text); white-space: nowrap;
+}
+
+/* ── PRICING TABLE ── */
+.pricing-table {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-top: 18px;
+}
+
+.pricing-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 16px;
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.pricing-row:last-child { border-bottom: none; }
+
+.pricing-row.total {
+    background: var(--text);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.pricing-row.pay-now {
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-weight: 700;
+}
+
+.pricing-row.due-door {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    font-weight: 700;
+}
+
+.pricing-label { color: inherit; opacity: 0.85; }
+.pricing-value { font-weight: 700; }
+
+/* ── ZONE CARDS ── */
+.zone-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+
+.zone-card {
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+    position: relative;
+    background: var(--surface);
+}
+
+.zone-card:hover { border-color: #94a3b8; }
+
+.zone-card input[type="radio"] {
+    position: absolute; opacity: 0; width: 0; height: 0;
+}
+
+.zone-card.selected {
+    border-color: var(--green);
+    background: var(--green-light);
+}
+
+.zone-card-title {
+    font-weight: 700; font-size: 0.88rem;
+    color: var(--text); margin-bottom: 2px;
+}
+
+.zone-card-price {
+    font-size: 0.8rem; color: var(--green); font-weight: 600;
+}
+
+.zone-card-time {
+    font-size: 0.75rem; color: var(--muted); margin-top: 2px;
+}
+
+.zone-check {
+    position: absolute; top: 10px; right: 10px;
+    width: 18px; height: 18px;
+    background: var(--green); border-radius: 50%;
+    display: none; align-items: center; justify-content: center;
+    color: white; font-size: 10px;
+}
+
+.zone-card.selected .zone-check { display: flex; }
+
+/* ── ADDRESS ── */
+.addr-input {
+    width: 100%;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 0.875rem;
+    font-family: 'Poppins', sans-serif;
+    outline: none; resize: none;
+    transition: border-color 0.2s;
+    color: var(--text);
+    background: var(--surface);
+}
+
+.addr-input:focus { border-color: var(--green); }
+
+/* ── PAYMENT CARDS ── */
+.pay-card {
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+    position: relative;
+    background: var(--surface);
+    margin-bottom: 10px;
+}
+
+.pay-card:last-child { margin-bottom: 0; }
+.pay-card:hover { border-color: #94a3b8; }
+
+.pay-card input[type="radio"] {
+    position: absolute; opacity: 0; width: 0; height: 0;
+}
+
+.pay-card.selected {
+    border-color: var(--green);
+    background: var(--green-light);
+}
+
+.pay-card-title {
+    font-weight: 700; font-size: 0.9rem; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+}
+
+.pay-card-desc {
+    font-size: 0.8rem; color: var(--muted); margin-top: 4px; line-height: 1.4;
+}
+
+.pay-check {
+    position: absolute; top: 14px; right: 14px;
+    width: 20px; height: 20px;
+    background: var(--green); border-radius: 50%;
+    display: none; align-items: center; justify-content: center;
+    color: white; font-size: 11px;
+}
+
+.pay-card.selected .pay-check { display: flex; }
+
+/* ── SUBMIT BTN ── */
+.place-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    border: none; border-radius: var(--radius-sm);
+    color: white; font-weight: 700; font-size: 1rem;
+    padding: 15px; cursor: pointer;
+    transition: 0.25s; font-family: 'Poppins', sans-serif;
+    box-shadow: 0 4px 14px rgba(22,163,74,0.25);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+.place-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(22,163,74,0.35);
+}
+
+.place-btn:disabled {
+    background: #cbd5e1; box-shadow: none;
+    cursor: not-allowed; color: #94a3b8;
+}
+
+/* ── DUE BADGE ── */
+.due-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--warning-bg);
+    border: 1px solid var(--warning-border);
+    color: var(--warning-text);
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 0.82rem; font-weight: 600;
+    margin-top: 12px; width: 100%;
+}
+
+/* ── EMPTY ── */
+.empty-state {
+    text-align: center; padding: 60px 20px;
+    background: var(--surface);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+}
+
+/* ── BACK LINK ── */
+.back-link {
+    color: var(--muted); font-size: 0.875rem;
+    font-weight: 600; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: color 0.2s;
+}
+
+.back-link:hover { color: var(--text); }
+
+@media (max-width: 768px) {
+    .zone-grid { grid-template-columns: 1fr; }
+    .ck-card { padding: 20px; }
+}
+</style>
+
+<div class="container py-5" style="max-width: 1000px;">
+
+    {% if items %}
+
+    <!-- STEP BAR -->
+    <div class="step-bar mb-5">
+        <div class="step done">
+            <div class="step-circle">✓</div>
+            <div class="step-label">Cart</div>
+        </div>
+        <div class="step-line done"></div>
+        <div class="step active">
+            <div class="step-circle">2</div>
+            <div class="step-label">Checkout</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step">
+            <div class="step-circle">3</div>
+            <div class="step-label">Payment</div>
+        </div>
+    </div>
+
+    <div class="row g-4 align-items-start">
+
+        <!-- LEFT: ORDER SUMMARY -->
+        <div class="col-lg-5">
+            <div class="ck-card">
+                <div class="ck-section-title">🛍️ Order Summary</div>
+
+                <!-- Items -->
+                <div style="max-height: 260px; overflow-y: auto; padding-right: 4px;">
+                    {% for item in items %}
+                    <div class="item-row">
+                        <div class="d-flex align-items-center gap-3">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" class="item-img" alt="{{ item.product.name }}">
+                            {% else %}
+                                <img src="{% static 'images/logo.jpeg' %}" class="item-img" alt="Product">
+                            {% endif %}
+                            <div>
+                                <div class="item-name">{{ item.product.name }}</div>
+                                <div class="item-qty">Qty: {{ item.quantity }}</div>
+                            </div>
+                        </div>
+                        <div class="item-price">Rs {{ item.subtotal }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pricing Breakdown -->
+                <div class="pricing-table">
+                    <div class="pricing-row">
+                        <span class="pricing-label">Subtotal</span>
+                        <span class="pricing-value">Rs <span id="subtotalVal">{{ total|floatformat:2 }}</span></span>
+                    </div>
+                    <div class="pricing-row">
+                        <span class="pricing-label">Delivery charge</span>
+                        <span class="pricing-value">Rs <span id="shippingVal">120.00</span></span>
+                    </div>
+                    <div class="pricing-row total">
+                        <span>Total</span>
+                        <span>Rs <span id="totalVal">{{ total|floatformat:2 }}</span></span>
+                    </div>
+                    <div class="pricing-row pay-now" id="payNowRow">
+                        <span class="pricing-label">💳 Pay now (QR)</span>
+                        <span class="pricing-value">Rs <span id="payNowVal">120.00</span></span>
+                    </div>
+                    <div class="pricing-row due-door" id="dueDoorRow">
+                        <span class="pricing-label">🚪 Due at door</span>
+                        <span class="pricing-value">Rs <span id="dueDoorVal">{{ total|floatformat:2 }}</span></span>
+                    </div>
+                </div>
+
+                <div class="due-badge" id="dueSummary">
+                    ⚠️ You will owe <strong id="dueSummaryAmt">Rs {{ total|floatformat:2 }}</strong> in cash at delivery
+                </div>
+
+            </div>
+        </div>
+
+        <!-- RIGHT: FORM -->
+        <div class="col-lg-7">
+            <div class="ck-card">
+                <form method="post" id="checkoutForm">
+                    {% csrf_token %}
+
+                    <!-- DELIVERY ZONE -->
+                    <div class="mb-4">
+                        <div class="ck-section-title">📍 Delivery Zone</div>
+                        <div class="zone-grid">
+                            <label class="zone-card selected" id="zoneInsideCard">
+                                <input type="radio" name="delivery_zone" value="inside" class="zone-radio" checked>
+                                <div class="zone-check">✓</div>
+                                <div class="zone-card-title">Inside Valley</div>
+                                <div class="zone-card-price">Rs 120.00</div>
+                                <div class="zone-card-time">1–2 business days</div>
+                            </label>
+                            <label class="zone-card" id="zoneOutsideCard">
+                                <input type="radio" name="delivery_zone" value="outside" class="zone-radio">
+                                <div class="zone-check">✓</div>
+                                <div class="zone-card-title">Outside Valley</div>
+                                <div class="zone-card-price">Rs 180.00</div>
+                                <div class="zone-card-time">2–3 business days</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- ADDRESS -->
+                    <div class="mb-4">
+                        <div class="ck-section-title">🏠 Delivery Address</div>
+                        <textarea
+                            name="address"
+                            class="addr-input"
+                            rows="3"
+                            placeholder="Street name, area, city, landmark..."
+                            required></textarea>
+                    </div>
+
+                    <!-- PAYMENT METHOD -->
+                    <div class="mb-4">
+                        <div class="ck-section-title">💳 Payment Method</div>
+
+                        <label class="pay-card" id="codCard">
+                            <input type="radio" name="payment_method" value="cod" class="pay-radio" checked>
+                            <div class="pay-check">✓</div>
+                            <div class="pay-card-title">📦 Cash on Delivery</div>
+                            <div class="pay-card-desc">Pay the delivery charge now via QR. Pay for your items in cash when they arrive.</div>
+                        </label>
+
+                        <label class="pay-card" id="qrCard">
+                            <input type="radio" name="payment_method" value="qr" class="pay-radio">
+                            <div class="pay-check">✓</div>
+                            <div class="pay-card-title">🟢 Full eSewa QR Payment</div>
+                            <div class="pay-card-desc">Pay the entire amount (items + delivery) now via eSewa. Nothing due at the door.</div>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="place-btn" id="submitBtn">
+                        <span>Place Order</span>
+                        <span>→</span>
+                    </button>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'cart' %}" class="back-link">← Back to Cart</a>
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+        <div style="font-size: 3rem; margin-bottom: 16px;">🛒</div>
+        <h4 style="font-weight: 700; margin-bottom: 8px;">Your cart is empty</h4>
+        <p style="color: var(--muted); margin-bottom: 24px;">Add some products before checking out.</p>
+        <a href="{% url 'home' %}" class="place-btn" style="display:inline-flex; width:auto; padding: 13px 28px; text-decoration:none;">
+            Browse Products
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+
+<script>
+const subtotal     = parseFloat("{{ total }}") || 0;
+const shippingInside  = 120;
+const shippingOutside = 180;
+
+// DOM refs
+const zoneRadios   = document.querySelectorAll('.zone-radio');
+const payRadios    = document.querySelectorAll('.pay-radio');
+const zoneInsideCard  = document.getElementById('zoneInsideCard');
+const zoneOutsideCard = document.getElementById('zoneOutsideCard');
+const codCard      = document.getElementById('codCard');
+const qrCard       = document.getElementById('qrCard');
+
+const shippingVal  = document.getElementById('shippingVal');
+const totalVal     = document.getElementById('totalVal');
+const payNowVal    = document.getElementById('payNowVal');
+const dueDoorVal   = document.getElementById('dueDoorVal');
+const payNowRow    = document.getElementById('payNowRow');
+const dueDoorRow   = document.getElementById('dueDoorRow');
+const dueSummary   = document.getElementById('dueSummary');
+const dueSummaryAmt= document.getElementById('dueSummaryAmt');
+const submitBtn    = document.getElementById('submitBtn');
+
+function getShipping() {
+    const zoneVal = document.querySelector('.zone-radio:checked')?.value;
+    return zoneVal === 'outside' ? shippingOutside : shippingInside;
+}
+
+function getPayMethod() {
+    return document.querySelector('.pay-radio:checked')?.value || 'cod';
+}
+
+function recalculate() {
+    const shipping = getShipping();
+    const method   = getPayMethod();
+    const total    = subtotal + shipping;
+
+    // Always show shipping & total
+    shippingVal.textContent = shipping.toFixed(2);
+    totalVal.textContent    = total.toFixed(2);
+
+    if (method === 'cod') {
+        // COD: pay shipping via QR now, rest at door
+        payNowVal.textContent  = shipping.toFixed(2);
+        dueDoorVal.textContent = subtotal.toFixed(2);
+        payNowRow.style.display  = 'flex';
+        dueDoorRow.style.display = 'flex';
+        dueSummary.style.display = 'flex';
+        dueSummaryAmt.textContent = 'Rs ' + subtotal.toFixed(2);
+    } else {
+        
+        payNowVal.textContent  = total.toFixed(2);
+        dueDoorVal.textContent = '0.00';
+        payNowRow.style.display  = 'flex';
+        dueDoorRow.style.display = 'flex';
+        dueSummary.style.display = 'none';
+    }
+}
+
+// Zone card toggle
+zoneRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+        zoneInsideCard.classList.toggle('selected',
+            document.querySelector('.zone-radio[value="inside"]').checked);
+        zoneOutsideCard.classList.toggle('selected',
+            document.querySelector('.zone-radio[value="outside"]').checked);
+        recalculate();
+    });
+});
+
+// Payment card toggle
+payRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+        codCard.classList.toggle('selected',
+            document.querySelector('.pay-radio[value="cod"]').checked);
+        qrCard.classList.toggle('selected',
+            document.querySelector('.pay-radio[value="qr"]').checked);
+        recalculate();
+    });
+});
+
+// Initial state
+codCard.classList.add('selected');
+recalculate();
+
+// Prevent double submit
+document.getElementById('checkoutForm')?.addEventListener('submit', () => {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+        <span class="spinner-border spinner-border-sm" role="status"></span>
+        <span>Placing order...</span>
+    `;
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,360 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+
+    
+
+    /* ==========================================================================
+       CONTAINER & SYSTEM LAYOUT
+       ========================================================================== */
+    .messages-wrapper {
+        max-width: 850px;
+        margin: 40px auto;
+        padding: 0 16px;
+    }
+
+    /* ==========================================================================
+       HEADER SECTIONS & FILTERS
+       ========================================================================== */
+    .messages-header {
+        margin-bottom: 28px;
+    }
+
+    .messages-header h3 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1e293b;
+        letter-spacing: -0.02em;
+    }
+
+    .messages-header p {
+        color: #64748b;
+        font-size: 15px;
+        margin-top: 4px;
+    }
+
+    /* Search Bar Feature */
+    .search-container {
+        position: relative;
+        margin-bottom: 24px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 16px 12px 42px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 14px;
+        color: #334155;
+        transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+        background: #fff;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        outline: none;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        pointer-events: none;
+    }
+
+    /* ==========================================================================
+       MESSAGE INTERACTIVE CARDS
+       ========================================================================== */
+    .message-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+    .message-card:hover {
+        transform: translateY(-2px);
+        border-color: #cbd5e1;
+        box-shadow: 0 10px 25px rgba(148, 163, 184, 0.12);
+    }
+
+    /* Unread Status Variations */
+    .message-card.unread-card {
+        background: #f8faff;
+        border-color: #bfdbfe;
+    }
+
+    .message-card.unread-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 20px;
+        bottom: 20px;
+        width: 4px;
+        background: #3b82f6;
+        border-radius: 0 4px 4px 0;
+    }
+
+    /* ==========================================================================
+       LEFT GRID: AVATARS & DETAILS
+       ========================================================================== */
+    .msg-left {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex: 1;
+        min-width: 0; /* Ensures inner text truncation operates cleanly */
+    }
+
+    .avatar-wrapper {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 16px;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.15);
+    }
+
+    /* Meta text layout */
+    .msg-info-block {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .msg-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 2px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .order-tag {
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 400;
+    }
+
+    .msg-sub {
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .last-msg {
+        font-size: 14px;
+        color: #475569;
+        font-weight: 400;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .unread-card .last-msg {
+        color: #1e1b4b;
+        font-weight: 600;
+    }
+
+    /* ==========================================================================
+       RIGHT GRID: METRICS & STATE BADGES
+       ========================================================================== */
+    .msg-right {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+        margin-left: 16px;
+        flex-shrink: 0;
+    }
+
+    .msg-time {
+        font-size: 12px;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    /* Status Pill Micro-designs */
+    .status-badge {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        padding: 5px 12px;
+        border-radius: 30px;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    .status-approved { background-color: #dcfce7; color: #166534; }
+    .status-rejected { background-color: #fee2e2; color: #991b1b; }
+    .status-ready    { background-color: #dbeafe; color: #1e40af; }
+    .status-pending  { background-color: #fef9c3; color: #854d0e; }
+
+    /* Counter indicator */
+    .unread-counter {
+        background: #ef4444;
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 20px;
+        animation: pulse 2s infinite;
+    }
+
+    /* ==========================================================================
+       EMPTY CONTAINER FALLBACK
+       ========================================================================== */
+    .empty-box {
+        text-align: center;
+        padding: 80px 24px;
+        background: #f8fafc;
+        border: 2px dashed #e2e8f0;
+        border-radius: 20px;
+        color: #64748b;
+    }
+
+    .empty-box svg {
+        color: #94a3b8;
+        margin-bottom: 16px;
+    }
+
+    .empty-box h5 {
+        font-size: 18px;
+        color: #334155;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+</style>
+
+<div class="container messages-wrapper">
+
+    <div class="messages-header">
+        <h3>Your Messages</h3>
+        <p>All your custom order conversations in one place</p>
+    </div>
+
+    <div id="chatContainer">
+        {% for order in orders %}
+            <a href="{% url 'order_chat' order.id %}" class="chat-card-link" style="text-decoration: none; display: block;">
+
+                <div class="message-card {% if order.unread_count > 0 %}unread-card{% endif %}" data-search-target="{{ order.id }} {{ order.address|lower }}">
+
+                    <div class="msg-left">
+                        <div class="avatar-wrapper">
+                            <div class="avatar">
+                                {{ order.user.username|first|upper }}
+                            </div>
+                        </div>
+
+                        <div class="msg-info-block">
+                            <div class="msg-title">
+                                <span>{{ order.user.username }}</span>
+                                <span class="order-tag">• Order #{{ order.id }}</span>
+                            </div>
+
+                            <p class="msg-sub">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                {{ order.address }}
+                            </p>
+
+                            <div class="last-msg">
+                                {% with last_msg=order.messages.last %}
+                                    {% if last_msg %}
+                                        {{ last_msg.content|default:"Sent an image attachment"|truncatechars:70 }}
+                                    {% else %}
+                                        <span class="text-muted italic">No messages sent yet</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="msg-right">
+                        <span class="msg-time">
+                            {{ order.created_at|date:"M d, g:i A" }}
+                        </span>
+
+                        <span class="status-badge 
+                            {% if order.status == 'approved' %}status-approved
+                            {% elif order.status == 'rejected' %}status-rejected
+                            {% elif order.status == 'ready' %}status-ready
+                            {% else %}status-pending{% endif %}">
+                            {{ order.status }}
+                        </span>
+
+                        {% if order.unread_count > 0 %}
+                            <span class="unread-counter">
+                                {{ order.unread_count }} new
+                            </span>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </a>
+        {% empty %}
+            <div class="empty-box">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <h5>No conversations found</h5>
+                <p>Once your custom orders are initiated, interactive chat panels will be generated here.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+    function filterChats() {
+        const input = document.getElementById('chatSearch');
+        const filter = input.value.toLowerCase();
+        const container = document.getElementById('chatContainer');
+        const links = container.getElementsByClassName('chat-card-link');
+
+        for (let i = 0; i < links.length; i++) {
+            const card = links[i].getElementsByClassName('message-card')[0];
+            if (card) {
+                const searchString = card.getAttribute('data-search-target');
+                if (searchString.indexOf(filter) > -1) {
+                    links[i].style.display = "";
+                } else {
+                    links[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
+
+{% endblock %}

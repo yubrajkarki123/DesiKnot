@@ -1,0 +1,563 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* ==========================================================================
+       GLOBAL CONTAINER & VARIABLES
+       ========================================================================== */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #4f46e5, #6366f1);
+        --user-msg-gradient: linear-gradient(135deg, #10b981, #059669);
+        --surface-card: #ffffff;
+        --background-muted: #f8fafc;
+        --border-color: #e2e8f0;
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+    }
+
+    .chat-wrapper {
+        max-width: 1100px;
+        margin: 30px auto;
+        padding: 0 16px;
+        font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    /* ==========================================================================
+       CHAT HEADER SECTION
+       ========================================================================== */
+    .chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-radius: 16px;
+        margin-bottom: 20px;
+        background: var(--primary-gradient);
+        color: white;
+        box-shadow: 0 10px 25px rgba(79, 70, 229, 0.15);
+    }
+
+    .chat-title {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+    }
+
+    .chat-header small {
+        opacity: 0.85;
+        font-size: 13px;
+        display: block;
+        margin-top: 2px;
+    }
+
+    .status-badge {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(4px);
+        padding: 6px 16px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* ==========================================================================
+       SPLIT SYSTEM GRID (ORDER META & CORE CHAT)
+       ========================================================================== */
+    .chat-grid {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    @media (max-width: 868px) {
+        .chat-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Meta Left Column */
+    .order-sidebar {
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 8px 12px;
+        font-size: 14px;
+        color: var(--text-main);
+    }
+
+    .summary-label {
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .summary-value {
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .ref-images {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .ref-images img {
+        width: 76px;
+        height: 76px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid var(--border-color);
+    }
+
+    .ref-images img:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ==========================================================================
+       MAIN CHAT WINDOW CANVAS
+       ========================================================================== */
+    .chat-box-container {
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+
+    .chat-box {
+        height: 480px;
+        overflow-y: auto;
+        background: var(--background-muted);
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    /* Message Rows & Avatars */
+    .message-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        max-width: 80%;
+    }
+
+    .message-row.user-row {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+    }
+
+    .message-row.system-row {
+        align-self: flex-start;
+    }
+
+    .chat-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Chat Bubbles Layout */
+    .chat-bubble {
+        padding: 12px 16px;
+        border-radius: 16px;
+        font-size: 14.5px;
+        line-height: 1.5;
+        word-break: break-word;
+        box-shadow: 0 2px 5px rgba(15, 23, 42, 0.03);
+    }
+
+    .chat-right .chat-bubble {
+        background: var(--user-msg-gradient);
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .chat-left .chat-bubble {
+        background: white;
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        border-bottom-left-radius: 4px;
+    }
+
+    .chat-time {
+        font-size: 11px;
+        margin-top: 6px;
+        display: block;
+        text-align: right;
+    }
+
+    .chat-right .chat-time { color: rgba(255, 255, 255, 0.75); }
+    .chat-left .chat-time { color: var(--text-muted); }
+
+    .bubble-image {
+        max-width: 220px;
+        max-height: 220px;
+        border-radius: 10px;
+        margin-top: 8px;
+        display: block;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+    }
+
+    .bubble-image:hover { opacity: 0.9; }
+
+    /* ==========================================================================
+       REAL-TIME INPUT COMPOSER
+       ========================================================================== */
+    .chat-input-bar {
+        background: white;
+        padding: 16px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .chat-composer {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--background-muted);
+        padding: 6px 12px;
+        border-radius: 28px;
+        border: 1px solid var(--border-color);
+    }
+
+    .chat-textarea {
+        flex: 1;
+        resize: none;
+        border: none;
+        background: transparent;
+        font-size: 14.5px;
+        padding: 8px 4px;
+        color: var(--text-main);
+        height: 24px;
+        max-height: 100px;
+        outline: none;
+    }
+
+    /* Icon Action Buttons */
+    .attach-label {
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    .attach-label:hover {
+        background: #e2e8f0;
+        color: var(--text-main);
+    }
+
+    .send-btn {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        flex-shrink: 0;
+    }
+
+    .send-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .send-btn svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+        margin-left: 2px;
+    }
+
+    /* File upload status toast */
+    .file-indicator {
+        font-size: 12px;
+        color: #4f46e5;
+        padding: 4px 16px;
+        display: none;
+        font-weight: 500;
+    }
+
+    /* ==========================================================================
+       AI ASSISTANT SLICK PANEL
+       ========================================================================== */
+    .ai-box {
+        margin-top: 24px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 18px;
+    }
+
+    .ai-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .ai-header h6 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #334155;
+        margin: 0;
+    }
+
+    .ai-messages {
+        max-height: 180px;
+        overflow-y: auto;
+        font-size: 13.5px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding-right: 4px;
+    }
+
+    .ai-bubble {
+        padding: 10px 14px;
+        border-radius: 12px;
+        max-width: 85%;
+        line-height: 1.42;
+    }
+
+    .ai-user {
+        background: #e2e8f0;
+        color: #1e293b;
+        align-self: flex-end;
+        border-bottom-right-radius: 2px;
+    }
+
+    .ai-reply {
+        background: #e0e7ff;
+        color: #1e1b4b;
+        align-self: flex-start;
+        border-bottom-left-radius: 2px;
+    }
+
+    /* ==========================================================================
+       MEDIA VIEWER MODAL LAYER
+       ========================================================================== */
+    #imgModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.95);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(8px);
+    }
+
+    #imgModal img {
+        max-width: 90%;
+        max-height: 85vh;
+        border-radius: 12px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+</style>
+
+<div class="container chat-wrapper">
+
+    <div class="chat-header">
+        <div>
+            <div class="chat-title">Order #{{ custom_order.id }}</div>
+            <small>Workspace Architecture & Verification</small>
+        </div>
+        <span class="status-badge">
+            {{ custom_order.status }}
+        </span>
+    </div>
+
+    <div class="chat-grid">
+        
+        <div class="order-sidebar">
+            <h5 class="fw-bold fs-6 mb-3 text-secondary text-uppercase tracking-wider" style="font-size: 11px !important; letter-spacing: 0.05em;">Order Matrix</h5>
+            <div class="summary-grid">
+                <span class="summary-label">Design Kurtha</span>
+                <span class="summary-value">{{ custom_order.kurtha_name }}</span>
+
+                <span class="summary-label">Bust Metric</span>
+                <span class="summary-value">{{ custom_order.bust }}</span>
+
+                <span class="summary-label">Waist Metric</span>
+                <span class="summary-value">{{ custom_order.waist }}</span>
+
+                <span class="summary-label">Hip Metric</span>
+                <span class="summary-value">{{ custom_order.hip }}</span>
+
+                <span class="summary-label">Height Dimension</span>
+                <span class="summary-value">{{ custom_order.height }}</span>
+
+                <span class="summary-label">Quantity Base</span>
+                <span class="summary-value">{{ custom_order.quantity }}</span>
+            </div>
+
+            {% if custom_order.order_details %}
+                <hr class="my-3 text-muted opacity-25">
+                <p class="small text-muted mb-0" style="line-height: 1.5;">{{ custom_order.order_details }}</p>
+            {% endif %}
+
+            {% if custom_order.images.all %}
+                <hr class="my-3 text-muted opacity-25">
+                <div class="ref-images">
+                    {% for img in custom_order.images.all %}
+                        <img src="{{ img.image.url }}" onclick="openModal(this)" alt="Reference specifications">
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="chat-box-container">
+            
+            <div class="chat-box" id="chatBox">
+                {% for msg in messages %}
+                    <div class="message-row {% if msg.sender == request.user %}user-row chat-right{% else %}system-row chat-left{% endif %}">
+                        
+                        {% if msg.sender != request.user %}
+                            {% with profile=msg.sender.profile %}
+                                {% if profile and profile.role|lower == 'owner' %}
+                                    <img src="{% static 'images/logo.JPG' %}" class="chat-avatar" alt="Team Avatar">
+                                {% elif profile.profile_image %}
+                                    <img src="{{ profile.profile_image.url }}" class="chat-avatar" alt="User Avatar">
+                                {% else %}
+                                    <img src="{% static 'images/default-avatar.png' %}" class="chat-avatar" alt="Default Avatar">
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
+
+                        <div class="chat-bubble">
+                            <div>{{ msg.content }}</div>
+                            
+                            {% if msg.image %}
+                                <img src="{{ msg.image.url }}" class="bubble-image" onclick="openModal(this)" alt="Shared attachment">
+                            {% endif %}
+
+                            <span class="chat-time">
+                                {{ msg.created_at|timesince }} ago
+                            </span>
+                        </div>
+
+                        {% if msg.sender == request.user %}
+                            {% if request.user.profile.profile_image %}
+                                <img src="{{ request.user.profile.profile_image.url }}" class="chat-avatar" alt="My Profile">
+                            {% else %}
+                                <img src="{% static 'DesiKnot_App/images/default-avatar.png' %}" class="chat-avatar" alt="Default Profile">
+                            {% endif %}
+                        {% endif %}
+
+                    </div>
+                {% empty %}
+                    <div class="text-center my-auto py-5 text-muted">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mb-2 opacity-50"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <p class="small mb-0">Initialize parameters. Send an inquiry below.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="chat-input-bar">
+                <div class="file-indicator" id="fileIndicator">📎 File attachment staging...</div>
+                <form method="POST" enctype="multipart/form-data" action="{% url 'send_message' custom_order.id %}" id="chatForm">
+                    {% csrf_token %}
+                    <div class="chat-composer">
+                        
+                        <label class="attach-label" title="Attach file specifications">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                            <input type="file" name="image" id="chatFileInput" hidden onchange="displayFileIndicator()">
+                        </label>
+
+                        <textarea name="message" class="chat-textarea" placeholder="Type an infrastructure updates inquiry..." rows="1"></textarea>
+
+                        <button class="send-btn" type="submit">
+                            <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    
+</div>
+
+<div id="imgModal" onclick="this.style.display='none'">
+    <img id="modalImg" src="" alt="Enlarged visualization viewport">
+</div>
+
+<script>
+    function openModal(img){
+        document.getElementById("imgModal").style.display = "flex";
+        document.getElementById("modalImg").src = img.src;
+    }
+
+    function scrollChat(){
+        const box = document.getElementById("chatBox");
+        box.scrollTop = box.scrollHeight;
+    }
+    window.onload = scrollChat;
+
+    function displayFileIndicator() {
+        const fileInput = document.getElementById('chatFileInput');
+        const indicator = document.getElementById('fileIndicator');
+        if(fileInput.files.length > 0) {
+            indicator.innerText = `📎 Ready to upload: ${fileInput.files[0].name}`;
+            indicator.style.display = "block";
+        }
+    }
+
+    // Auto-expanding textarea layout handling logic
+    const tx = document.getElementsByClassName('chat-textarea');
+    for (let i = 0; i < tx.length; i++) {
+        tx[i].setAttribute('style', 'height:' + (tx[i].scrollHeight) + 'px;overflow-y:hidden;');
+        tx[i].addEventListener("input", OnInput, false);
+    }
+
+    function OnInput() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight - 16) + 'px';
+    }
+
+    /* Client-side Validation Interceptor */
+    document.getElementById("chatForm").addEventListener("submit", function(e){
+        let msg = document.querySelector(".chat-textarea").value.trim();
+        let file = document.getElementById("chatFileInput").value;
+
+        if(!msg && !file){
+            e.preventDefault();
+            alert("Please include text content or stage an image attachment.");
+        }
+    });
+</script>
+
+{% endblock %}

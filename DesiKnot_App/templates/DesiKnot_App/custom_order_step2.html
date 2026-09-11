@@ -1,0 +1,204 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-5" style="max-width: 850px;">
+
+    <!-- HEADER -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-success">🧵 Custom Order</h2>
+        <p class="text-muted">Step 2 of 2 — Measurements & Design</p>
+
+        <div class="progress" style="height:6px; border-radius:20px;">
+            <div class="progress-bar bg-success" style="width:100%"></div>
+        </div>
+    </div>
+
+    <!-- CARD -->
+    <div class="card shadow-lg border-0 rounded-4 p-4">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- IMPORTANT FORM FIX -->
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- MEASUREMENTS -->
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3">📏 Measurements</h5>
+
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+                        <input type="number" name="bust" class="form-control" placeholder="Bust (cm)">
+                    </div>
+
+                    <div class="col-md-3">
+                        <input type="number" name="waist" class="form-control" placeholder="Waist (cm)">
+                    </div>
+
+                    <div class="col-md-3">
+                        <input type="number" name="hip" class="form-control" placeholder="Hip (cm)">
+                    </div>
+
+                    <div class="col-md-3">
+                        <input type="number" name="height" class="form-control" placeholder="Height (cm)">
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- QUANTITY -->
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3">🔢 Quantity</h5>
+
+                <input type="number"
+                       name="quantity"
+                       class="form-control"
+                       min="1"
+                       value="1"
+                       required>
+            </div>
+
+            <!-- IMAGES -->
+            <div class="mb-4">
+                <h5 class="fw-bold mb-2">🖼 Reference Images</h5>
+
+                <input type="file"
+                       id="imageInput"
+                       name="images"
+                       class="form-control"
+                       accept="image/*"
+                       multiple>
+
+                <small class="text-muted d-block mt-1">
+                    Upload up to 5 images (max 2MB each)
+                </small>
+
+                <!-- IMAGE COUNT -->
+                <small id="fileCount" class="text-success fw-semibold"></small>
+
+                <!-- PREVIEW -->
+                <div id="preview" class="d-flex flex-wrap gap-2 mt-3"></div>
+            </div>
+
+            <!-- DELIVERY -->
+            <div class="mb-4">
+                <h5 class="fw-bold mb-2">📅 Delivery Date</h5>
+
+                <input type="date"
+                    id="deliveryDate"
+                    name="delivery_date"
+                    class="form-control"
+                    required>
+            </div>
+            <!-- NOTES -->
+            <div class="mb-4">
+                <h5 class="fw-bold mb-2">📝 Additional Instructions</h5>
+
+                <textarea name="order_details"
+                          class="form-control"
+                          rows="4"
+                          placeholder="Describe your design requirements..."></textarea>
+            </div>
+
+            <!-- SUBMIT -->
+            <div class="d-grid">
+                <button type="submit" class="btn btn-success btn-lg fw-semibold rounded-3">
+                    Submit Custom Order ✓
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    // Prevent selecting past dates
+    const deliveryDate = document.getElementById("deliveryDate");
+
+    if (deliveryDate) {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+
+        const todayString = `${year}-${month}-${day}`;
+
+        deliveryDate.min = todayString;
+    }
+</script>
+
+<!-- JS -->
+<script>
+const input = document.getElementById("imageInput");
+const preview = document.getElementById("preview");
+const fileCount = document.getElementById("fileCount");
+
+if (input) {
+    input.addEventListener("change", function () {
+
+        preview.innerHTML = "";
+
+        let files = Array.from(this.files);
+
+        // LIMIT CHECK
+        if (files.length > 5) {
+            alert("Maximum 5 images allowed.");
+            this.value = "";
+            fileCount.innerText = "";
+            return;
+        }
+
+        fileCount.innerText = files.length + " image(s) selected";
+
+        files.forEach(file => {
+
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(file);
+
+            img.style.width = "110px";
+            img.style.height = "110px";
+            img.style.objectFit = "cover";
+            img.style.borderRadius = "10px";
+            img.style.border = "1px solid #ddd";
+
+            preview.appendChild(img);
+        });
+    });
+}
+</script>
+
+<!-- STYLE -->
+<style>
+.card {
+    transition: 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-3px);
+}
+.form-control {
+    border-radius: 10px;
+}
+.form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.15rem rgba(40,167,69,0.15);
+}
+.btn-success:hover {
+    transform: scale(1.02);
+    transition: 0.2s;
+}
+.progress {
+    border-radius: 20px;
+}
+</style>
+
+{% endblock %}

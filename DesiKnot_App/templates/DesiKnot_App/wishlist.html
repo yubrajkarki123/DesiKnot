@@ -1,0 +1,146 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+body {
+    background: #f6f7fb;
+    font-family: 'Poppins', sans-serif;
+}
+
+.wishlist-wrapper {
+    background: #fff;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
+.wishlist-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 25px;
+}
+
+.wishlist-card {
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 16px;
+    margin-bottom: 15px;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.wishlist-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+.wishlist-card img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.wishlist-info h5 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.wishlist-price {
+    color: #198754;
+    font-weight: 700;
+    margin-top: 5px;
+}
+
+.btn-group {
+    margin-left: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-view {
+    background: #198754;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.btn-remove {
+    background: #dc3545;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.empty-box {
+    text-align: center;
+    padding: 50px;
+    color: #777;
+}
+</style>
+
+<div class="container py-5">
+
+    <div class="wishlist-wrapper">
+
+
+        <h2 class="wishlist-title">❤️ My Wishlist</h2>
+
+        {% if items %}
+
+            {% for item in items %}
+            <div class="wishlist-card">
+
+                {% if item.product.image %}
+                    <img src="{{ item.product.image.url }}">
+                {% else %}
+                    <img src="{% static 'images/logo.jpeg' %}">
+                {% endif %}
+
+                <div class="wishlist-info">
+                    <h5>{{ item.product.name }}</h5>
+                    <div class="wishlist-price">NRs {{ item.product.price }}</div>
+                    <small class="text-muted">{{ item.product.business.name }}</small>
+                </div>
+
+                <div class="btn-group">
+
+                    <a href="{% url 'product_detail' item.product.slug %}" class="btn-view">
+                        View
+                    </a>
+
+                    <!-- OPTIONAL: remove button -->
+                    <form method="POST" action="{% url 'toggle_wishlist' item.product.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-remove">
+                            Remove
+                        </button>
+                    </form>
+
+                </div>
+
+            </div>
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty-box">
+                <h4>No items in your wishlist ❤️</h4>
+                <p>Start adding products you like!</p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

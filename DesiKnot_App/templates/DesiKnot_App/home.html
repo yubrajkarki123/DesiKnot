@@ -1,0 +1,884 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+:root {
+    --green: #16a34a;
+    --green-dark: #15803d;
+    --green-light: #f0fdf4;
+    --green-border: #bbf7d0;
+    --surface: #ffffff;
+    --bg: #f8fafc;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+}
+
+body {
+    background: var(--bg);
+    font-family: 'Poppins', sans-serif;
+    color: var(--text);
+}
+
+/* ══════════════════════════
+   HERO CAROUSEL
+══════════════════════════ */
+
+.carousel-discount-tag{
+    display: inline-block;
+    background: linear-gradient(135deg, #dc3545, #b02a37);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    margin-right: 8px;
+    backdrop-filter: blur(6px);
+}
+
+.carousel-price-row{
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.carousel-current-price{
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.carousel-original-price{
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    text-decoration: line-through;
+}
+
+.hero-carousel-wrap {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 0 32px 32px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    margin-bottom: 48px;
+}
+
+.carousel-img {
+    height: 520px;
+    object-fit: cover;
+    width: 100%;
+    transition: transform 7s ease;
+    filter: brightness(0.82);
+}
+
+.carousel-item.active .carousel-img {
+    transform: scale(1.06);
+}
+
+.carousel-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.05) 0%,
+        rgba(0,0,0,0.55) 100%
+    );
+    pointer-events: none;
+}
+
+.carousel-caption {
+    bottom: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 680px;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.carousel-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    backdrop-filter: blur(6px);
+}
+
+.carousel-caption h2 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+.carousel-caption p {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.carousel-explore-btn {
+    background: white;
+    color: var(--text);
+    border: none;
+    border-radius: 50px;
+    padding: 13px 30px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.25s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.carousel-explore-btn:hover {
+    background: var(--green);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(22,163,74,0.4);
+}
+
+.carousel-indicators [data-bs-target] {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.5);
+    transition: 0.3s;
+}
+
+.carousel-indicators .active {
+    background: white;
+    width: 24px;
+    border-radius: 4px;
+}
+
+/* ══════════════════════════
+   CATEGORY PILLS
+══════════════════════════ */
+.category-strip-wrap {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 20px 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    border: 1px solid var(--border);
+    margin-bottom: 36px;
+}
+
+.category-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.cat-pill {
+    text-decoration: none;
+    padding: 9px 20px;
+    border-radius: 50px;
+    background: var(--bg);
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: 1.5px solid var(--border);
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+.cat-pill:hover {
+    background: var(--green-light);
+    color: var(--green-dark);
+    border-color: var(--green-border);
+    transform: translateY(-2px);
+}
+
+.cat-pill.active-cat {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(15,23,42,0.2);
+}
+
+/* ══════════════════════════
+   SEARCH & FILTER BAR
+══════════════════════════ */
+.filter-bar {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 20px 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    border: 1px solid var(--border);
+    margin-bottom: 40px;
+}
+
+.filter-input {
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 11px 16px;
+    font-size: 0.875rem;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    width: 100%;
+    color: var(--text);
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(22,163,74,0.1);
+    background: white;
+}
+
+.filter-input::placeholder { color: #b0bec5; }
+
+.filter-btn {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 11px 24px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(22,163,74,0.3);
+}
+
+.filter-clear {
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s;
+    white-space: nowrap;
+}
+
+.filter-clear:hover { color: var(--text); }
+
+.active-filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+}
+
+.active-filter-chip {
+    background: var(--green-light);
+    color: var(--green-dark);
+    border: 1px solid var(--green-border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ══════════════════════════
+   SECTION HEADER
+══════════════════════════ */
+.section-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.section-tag {
+    display: inline-block;
+    background: var(--green-light);
+    color: var(--green-dark);
+    border: 1px solid var(--green-border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.section-title {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+}
+
+.section-sub {
+    font-size: 0.875rem;
+    color: var(--muted);
+}
+
+.section-line {
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--green), var(--green-dark));
+    border-radius: 4px;
+    margin: 12px auto 0;
+}
+
+/* ══════════════════════════
+   PRODUCT CARDS
+══════════════════════════ */
+.product-card {
+    background: var(--surface);
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: 0.3s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.10);
+    border-color: var(--green-border);
+}
+
+.product-img-wrap {
+    position: relative;
+    overflow: hidden;
+    height: 240px;
+}
+
+.product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-img {
+    transform: scale(1.07);
+}
+
+.product-badge {
+    position: absolute;
+    top: 12px; left: 12px;
+    background: var(--text);
+    color: white;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.discount-badge{
+    position:absolute;
+    top:12px;
+    right:12px;
+
+    background:#ef4444;
+    color:#fff;
+
+    padding:6px 12px;
+    border-radius:10px;
+
+    font-size:13px;
+    font-weight:700;
+
+    z-index:10;
+
+    box-shadow:0 6px 16px rgba(0,0,0,.15);
+}
+
+.old-price{
+    text-decoration:line-through;
+    color:#94a3b8;
+    font-size:.9rem;
+    font-weight:500;
+    margin-right:8px;
+}
+
+.new-price{
+    color:#16a34a;
+    font-size:1.15rem;
+    font-weight:800;
+}
+
+.wishlist-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 34px; height: 34px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: 0.2s;
+    font-size: 15px;
+}
+
+.wishlist-btn:hover {
+    transform: scale(1.15);
+    background: #fef2f2;
+}
+
+.product-body {
+    padding: 16px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.product-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    overflow: hidden;
+}
+
+.product-price {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--green-dark);
+    margin-bottom: 14px;
+}
+
+.product-price span {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.add-cart-btn {
+    background: var(--text);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 11px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    width: 100%;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: auto;
+}
+
+.add-cart-btn:hover {
+    background: var(--green);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(22,163,74,0.3);
+}
+
+/* ══════════════════════════
+   NOT AVAILABLE
+══════════════════════════ */
+.not-available-box {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--surface);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+}
+
+/* ══════════════════════════
+   PROMO BANNER
+══════════════════════════ */
+.promo-banner {
+    background: linear-gradient(135deg, #0f172a, #1e3a2f, #16a34a);
+    border-radius: 20px;
+    padding: 40px 36px;
+    color: white;
+    margin: 48px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.promo-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.promo-sub {
+    font-size: 0.875rem;
+    opacity: 0.8;
+}
+
+.promo-btn {
+    background: white;
+    color: var(--text);
+    border: none;
+    border-radius: 50px;
+    padding: 13px 28px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.promo-btn:hover {
+    background: var(--green-light);
+    color: var(--green-dark);
+    transform: translateY(-2px);
+}
+
+/* ══════════════════════════
+   RESPONSIVE
+══════════════════════════ */
+@media (max-width: 768px) {
+    .carousel-img        { height: 280px; }
+    .carousel-caption h2 { font-size: 1.5rem; }
+    .carousel-caption p  { display: none; }
+    .section-title       { font-size: 1.5rem; }
+    .product-img-wrap    { height: 200px; }
+    .promo-banner        { text-align: center; justify-content: center; }
+    .filter-bar .row     { gap: 8px; }
+}
+</style>
+
+
+<!-- ══════════════════════════
+     HERO CAROUSEL
+══════════════════════════ -->
+{% if products %}
+<div class="hero-carousel-wrap">
+    <div id="heroCarousel" class="carousel slide carousel-fade"
+         data-bs-ride="carousel" data-bs-interval="3500" data-bs-pause="false">
+
+        <div class="carousel-indicators">
+            {% for product in products|slice:":5" %}
+            <button type="button" data-bs-target="#heroCarousel"
+                    data-bs-slide-to="{{ forloop.counter0 }}"
+                    class="{% if forloop.first %}active{% endif %}"></button>
+            {% endfor %}
+        </div>
+
+        <div class="carousel-inner">
+            {% for product in products|slice:":5" %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="carousel-img" alt="{{ product.name }}">
+                {% else %}
+                    <img src="{% static 'images/logo.jpeg' %}" class="carousel-img" alt="{{ product.name }}">
+                {% endif %}
+                <div class="carousel-overlay"></div>
+                <div class="carousel-caption">
+
+                    {% if product.has_discount %}
+                    <div class="carousel-discount-tag">🔥 {{ product.discount_percentage }}% OFF</div>
+                    {% else %}
+                    <div class="carousel-tag">New Arrival</div>
+                    {% endif %}
+
+                    <h2>{{ product.name }}</h2>
+                    <p>{{ product.description|truncatechars:90 }}</p>
+
+                    <div class="carousel-price-row">
+                        <span class="carousel-current-price">Rs {{ product.discounted_price }}</span>
+                        {% if product.has_discount %}
+                        <span class="carousel-original-price">Rs {{ product.price }}</span>
+                        {% endif %}
+                    </div>
+
+                    <a href="{% url 'product_detail' product.slug %}" class="carousel-explore-btn">
+                        Explore Now <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
+</div>
+{% endif %}
+
+
+<div class="container">
+
+<!-- ══════════════════════════
+     CATEGORY PILLS
+══════════════════════════ -->
+<div class="category-strip-wrap">
+    <div class="category-strip">
+        <a href="{% url 'home' %}"
+           class="cat-pill {% if not selected_category %}active-cat{% endif %}">
+            🛍️ All
+        </a>
+        {% for category in categories %}
+        <a href="?category={{ category.id }}"
+           class="cat-pill {% if selected_category == category.id|stringformat:'s' %}active-cat{% endif %}">
+            {% if category.name == "Ethnic Wear" %}🪡
+            {% elif category.name == "Western Wear" %}👚
+            {% elif category.name == "Skirts and Dress" %}👗
+            {% else %}✨{% endif %}
+            {{ category.name }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+
+<!-- ══════════════════════════
+     SEARCH + FILTER BAR
+══════════════════════════ -->
+<div class="filter-bar">
+    <form method="GET">
+
+        <!-- Carries the active category over when searching/filtering by price -->
+        {% if selected_category %}
+        <input type="hidden" name="category" value="{{ selected_category }}">
+        {% endif %}
+
+        <div class="row g-2 align-items-center">
+
+            <div class="col-12 col-md-4">
+                <div style="position:relative;">
+                    <i class="bi bi-search" style="position:absolute; left:13px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:14px;"></i>
+                    <input type="text" name="q" value="{{ query|default:'' }}"
+                           class="filter-input" placeholder="Search products..."
+                           style="padding-left: 38px;">
+                </div>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <input type="number" step="0.01" min="0" name="min_price" value="{{ min_price|default:'' }}"
+                       class="filter-input" placeholder="Min price">
+            </div>
+
+            <div class="col-6 col-md-2">
+                <input type="number" step="0.01" min="0" name="max_price" value="{{ max_price|default:'' }}"
+                       class="filter-input" placeholder="Max price">
+            </div>
+
+            <div class="col-6 col-md-2">
+                <select name="sort" class="filter-input" style="cursor:pointer;">
+                    <option value="">Sort by</option>
+                    <option value="low"  {% if sort == "low"  %}selected{% endif %}>Price: Low → High</option>
+                    <option value="high" {% if sort == "high" %}selected{% endif %}>Price: High → Low</option>
+                    <option value="new"  {% if sort == "new"  %}selected{% endif %}>Newest First</option>
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2 d-flex gap-2 align-items-center">
+                <button type="submit" class="filter-btn">
+                    <i class="bi bi-search"></i> Search
+                </button>
+                {% if query or min_price or max_price or sort or selected_category %}
+                <a href="{% url 'home' %}" class="filter-clear">
+                    <i class="bi bi-x-circle"></i> Clear
+                </a>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <!-- ACTIVE FILTER SUMMARY (new — makes it visible what's applied) -->
+        {% if query or min_price or max_price %}
+        <div class="active-filters-row">
+            {% if query %}
+            <span class="active-filter-chip"><i class="bi bi-search"></i> "{{ query }}"</span>
+            {% endif %}
+            {% if min_price %}
+            <span class="active-filter-chip"><i class="bi bi-arrow-down"></i> Min Rs {{ min_price }}</span>
+            {% endif %}
+            {% if max_price %}
+            <span class="active-filter-chip"><i class="bi bi-arrow-up"></i> Max Rs {{ max_price }}</span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </form>
+</div>
+
+
+<!-- ══════════════════════════
+     PRODUCTS GRID
+══════════════════════════ -->
+<div class="section-header">
+    <div class="section-tag">✨ Fresh Picks</div>
+    <h2 class="section-title">Our Latest Collection</h2>
+    <p class="section-sub">Handpicked styles for every occasion</p>
+    <div class="section-line"></div>
+</div>
+
+{% if not_available %}
+<div class="not-available-box">
+    <div style="font-size: 3rem; margin-bottom: 12px;">😕</div>
+    <h5 style="font-weight: 700;">No products match your filters</h5>
+    <p style="color: var(--muted); margin-bottom: 20px;">Try widening your price range or clearing filters.</p>
+    <a href="{% url 'home' %}" class="carousel-explore-btn" style="display:inline-flex;">
+        Clear Filters <i class="bi bi-arrow-right"></i>
+    </a>
+</div>
+
+{% else %}
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 mb-5">
+    {% for product in products %}
+    <div class="col">
+        <div class="product-card">
+
+            <!-- IMAGE -->
+            <a href="{% url 'product_detail' product.slug %}" class="product-img-wrap d-block">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="product-img" alt="{{ product.name }}">
+                {% else %}
+                    <img src="{% static 'images/logo.jpeg' %}" class="product-img" alt="{{ product.name }}">
+                {% endif %}
+
+                {% if forloop.counter <= 3 %}
+                <div class="product-badge">New</div>
+                {% endif %}
+
+                {% if product.has_discount %}
+                <div class="discount-badge">
+                    {{ product.discount_percentage }}% OFF
+                </div>
+                {% endif %}
+            </a>
+
+            <!-- WISHLIST -->
+            {% if request.user.is_authenticated %}
+            <a href="{% url 'toggle_wishlist' product.id %}" class="wishlist-btn">❤️</a>
+            {% endif %}
+
+            <!-- BODY -->
+            <div class="product-body">
+                <div class="product-name">{{ product.name }}</div>
+                <div class="product-desc">{{ product.description|truncatechars:75 }}</div>
+                <div class="product-price">
+
+                    {% if product.has_discount %}
+
+                        <div>
+                            <span class="old-price">
+                                Rs {{ product.price }}
+                            </span>
+                        </div>
+
+                        <div>
+                            <span class="new-price">
+                                Rs {{ product.discounted_price }}
+                            </span>
+                            <span>/ piece</span>
+                        </div>
+
+                    {% else %}
+
+                        Rs {{ product.price }}
+                        <span>/ piece</span>
+
+                    {% endif %}
+
+                </div>
+                <form method="post" action="{% url 'add_to_cart' product.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="add-cart-btn">
+                        <i class="bi bi-cart-plus"></i> Add to Cart
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    {% empty %}
+    <div class="col-12">
+        <div class="not-available-box">
+            <div style="font-size: 3rem; margin-bottom: 12px;">🔍</div>
+            <h5 style="font-weight: 700;">No products found</h5>
+            <p style="color: var(--muted);">Try a different search or browse all categories.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endif %}
+
+
+<!-- ══════════════════════════
+     PROMO BANNER
+══════════════════════════ -->
+<div class="promo-banner">
+    <div>
+        <div class="promo-title">✂️ Want something unique?</div>
+        <div class="promo-sub">Place a custom tailoring order — designed exactly for you.</div>
+    </div>
+    <a href="{% url 'custom_order_step1' %}" class="promo-btn">
+        Start Custom Order <i class="bi bi-arrow-right"></i>
+    </a>
+</div>
+
+
+</div><!-- /container -->
+
+{% endblock %}

@@ -1,0 +1,522 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+:root {
+    --green: #16a34a;
+    --green-dark: #15803d;
+    --green-light: #f0fdf4;
+    --green-border: #bbf7d0;
+    --surface: #ffffff;
+    --bg: #f1f5f9;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --radius: 20px;
+}
+
+body {
+    background: var(--bg);
+    font-family: 'Poppins', sans-serif;
+    color: var(--text);
+}
+
+.profile-wrapper {
+    padding: 48px 0;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* ── CARD ── */
+.profile-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.07);
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+/* ── BANNER ── */
+.profile-banner {
+    height: 100px;
+    background: linear-gradient(135deg, #0f172a, #1e3a2f, #16a34a);
+    position: relative;
+}
+
+/* ── AVATAR SECTION ── */
+.avatar-section {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 32px;
+    margin-top: -52px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.avatar-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.avatar-img {
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--surface);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    transition: 0.3s;
+    display: block;
+}
+
+.avatar-label {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    opacity: 0;
+    cursor: pointer;
+    transition: opacity 0.25s;
+    border: 4px solid var(--surface);
+    border-radius: 50%;
+}
+
+.avatar-wrap:hover .avatar-label { opacity: 1; }
+.avatar-wrap:hover .avatar-img   { transform: scale(1.03); }
+
+.avatar-edit-dot {
+    position: absolute;
+    bottom: 4px; right: 4px;
+    width: 28px; height: 28px;
+    background: var(--green);
+    border: 3px solid var(--surface);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px;
+    pointer-events: none;
+}
+
+.avatar-action-btns {
+    display: none;
+    gap: 8px;
+    animation: fadeUp 0.3s ease;
+    align-items: center;
+    margin-top: 52px;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.btn-save-photo {
+    background: var(--green);
+    color: white; border: none;
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-size: 0.8rem; font-weight: 700;
+    cursor: pointer; font-family: 'Poppins', sans-serif;
+    transition: 0.2s;
+}
+
+.btn-save-photo:hover { background: var(--green-dark); }
+
+.btn-cancel-photo {
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--muted); border-radius: 10px;
+    padding: 8px 14px; font-size: 0.8rem;
+    font-weight: 600; cursor: pointer;
+    font-family: 'Poppins', sans-serif; transition: 0.2s;
+}
+
+.btn-cancel-photo:hover { background: var(--border); }
+
+/* ── USER INFO ── */
+.user-info {
+    padding: 0 32px 28px;
+}
+
+.user-name {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 2px;
+}
+
+.user-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--green-light);
+    color: var(--green-dark);
+    border: 1px solid var(--green-border);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+/* ── DETAIL ROWS ── */
+.details-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 16px;
+    transition: 0.2s;
+}
+
+.detail-row:hover {
+    border-color: var(--green-border);
+    background: var(--green-light);
+    transform: translateX(3px);
+}
+
+.detail-icon {
+    width: 38px; height: 38px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+    color: var(--muted);
+}
+
+.detail-lbl {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.detail-val {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.detail-val.empty { color: var(--muted); font-weight: 400; font-style: italic; }
+
+/* ── STATS ROW ── */
+.stats-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+}
+
+.stat-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    transition: 0.2s;
+}
+
+.stat-box:hover {
+    border-color: var(--green-border);
+    background: var(--green-light);
+}
+
+.stat-num {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.stat-lbl {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+/* ── ACTION FOOTER ── */
+.profile-footer {
+    padding: 20px 32px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: var(--bg);
+}
+
+.btn-back {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.2s;
+}
+
+.btn-back:hover { color: var(--text); }
+
+.btn-edit {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 11px 22px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.25s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-edit:hover {
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15,23,42,0.25);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+    .profile-wrapper { padding: 24px 12px; }
+    .avatar-section  { padding: 0 20px; }
+    .user-info       { padding: 0 20px 24px; }
+    .profile-footer  { padding: 16px 20px; }
+    .stats-strip     { grid-template-columns: 1fr 1fr; }
+    .user-name       { font-size: 1.1rem; }
+}
+</style>
+
+<div class="container">
+<div class="profile-wrapper">
+
+    <div class="profile-card">
+
+        <!-- BANNER -->
+        <div class="profile-banner"></div>
+
+        <!-- AVATAR + SAVE BUTTONS -->
+        <form method="POST" enctype="multipart/form-data" id="photoForm">
+            {% csrf_token %}
+
+            <div class="avatar-section">
+                <div class="avatar-wrap">
+                    {% if profile.profile_image %}
+                        <img id="previewImg" src="{{ profile.profile_image.url }}" class="avatar-img" alt="Profile">
+                    {% else %}
+                        <div id="defaultAvatar" class="avatar-img d-flex align-items-center justify-content-center fw-bold"
+                             style="background: linear-gradient(135deg, #0f172a, #16a34a); color: white; font-size: 2.2rem; border: 4px solid var(--surface); box-shadow: 0 4px 16px rgba(0,0,0,0.12);">
+                            {{ user.username|slice:":1"|upper }}
+                        </div>
+                        <img id="previewImg" src="" class="avatar-img" alt="Profile" style="display:none;">
+                    {% endif %}
+
+                    <label for="photoInput" class="avatar-label">
+                        <i class="bi bi-camera-fill" style="font-size:20px; margin-bottom:4px;"></i>
+                        CHANGE
+                    </label>
+
+                    <div class="avatar-edit-dot">
+                        <i class="bi bi-pencil-fill"></i>
+                    </div>
+                </div>
+
+                <div class="avatar-action-btns" id="actionBtns">
+                    <button type="submit" class="btn-save-photo">
+                        <i class="bi bi-check-lg me-1"></i> Save Photo
+                    </button>
+                    <button type="button" class="btn-cancel-photo" onclick="cancelPhoto()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+
+            <input type="file" id="photoInput" name="profile_image"
+                   accept="image/*" style="display:none;"
+                   onchange="previewPhoto(event)">
+        </form>
+
+        <!-- USER INFO -->
+        <div class="user-info">
+
+            <div class="user-name">
+                {{ user.first_name }} {{ user.last_name }}
+                {% if not user.first_name %}{{ user.username }}{% endif %}
+            </div>
+
+            <div class="user-role">
+                {% if request.user.is_superuser %}
+                    👑 Admin
+                {% elif profile.role == 'owner' %}
+                    🏪 Store Owner
+                {% else %}
+                    🛍️ Customer
+                {% endif %}
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-strip">
+                <div class="stat-box">
+                    <div class="stat-num">{{ user.orders.count }}</div>
+                    <div class="stat-lbl">Orders</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">{{ user.custom_orders.count }}</div>
+                    <div class="stat-lbl">Custom Orders</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">
+                        {% with joined=user.date_joined %}
+                            {{ joined|date:"Y" }}
+                        {% endwith %}
+                    </div>
+                    <div class="stat-lbl">Member Since</div>
+                </div>
+            </div>
+
+            <!-- DETAILS -->
+            <div class="details-grid">
+
+                <div class="detail-row">
+                    <div class="detail-icon"><i class="bi bi-at"></i></div>
+                    <div>
+                        <div class="detail-lbl">Username</div>
+                        <div class="detail-val">{{ user.username }}</div>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-icon"><i class="bi bi-envelope"></i></div>
+                    <div>
+                        <div class="detail-lbl">Email Address</div>
+                        <div class="detail-val">
+                            {% if user.email %}{{ user.email }}
+                            {% else %}<span class="empty">Not set</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-icon"><i class="bi bi-person"></i></div>
+                    <div>
+                        <div class="detail-lbl">Full Name</div>
+                        <div class="detail-val">
+                            {% if user.first_name or user.last_name %}
+                                {{ user.first_name }} {{ user.last_name }}
+                            {% else %}
+                                <span class="empty">Not set</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-icon"><i class="bi bi-phone"></i></div>
+                    <div>
+                        <div class="detail-lbl">Phone Number</div>
+                        <div class="detail-val">
+                            {% if profile.phone %}{{ profile.phone }}
+                            {% else %}<span class="empty">Not set</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-icon"><i class="bi bi-calendar3"></i></div>
+                    <div>
+                        <div class="detail-lbl">Member Since</div>
+                        <div class="detail-val">{{ user.date_joined|date:"d M Y" }}</div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="profile-footer">
+            <a href="{% url 'home' %}" class="btn-back">
+                <i class="bi bi-arrow-left"></i> Back to Home
+            </a>
+            <a href="{% url 'edit_profile' %}" class="btn-edit">
+                <i class="bi bi-pencil-square"></i> Edit Profile
+            </a>
+        </div>
+
+    </div>
+
+</div>
+</div>
+
+<script>
+let originalSrc = null;
+
+function previewPhoto(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function () {
+        const img         = document.getElementById('previewImg');
+        const defaultAvatar = document.getElementById('defaultAvatar');
+
+        // Hide the initial avatar div if present
+        if (defaultAvatar) defaultAvatar.style.display = 'none';
+
+        img.style.display = 'block';
+        if (!originalSrc) originalSrc = img.src;
+        img.src = reader.result;
+
+        document.getElementById('actionBtns').style.display = 'flex';
+    };
+    reader.readAsDataURL(file);
+}
+
+function cancelPhoto() {
+    const img           = document.getElementById('previewImg');
+    const input         = document.getElementById('photoInput');
+    const btns          = document.getElementById('actionBtns');
+    const defaultAvatar = document.getElementById('defaultAvatar');
+
+    if (originalSrc) {
+        img.src = originalSrc;
+    } else {
+        // No original image — restore the initial avatar
+        img.style.display = 'none';
+        if (defaultAvatar) defaultAvatar.style.display = 'flex';
+    }
+
+    input.value = '';
+    btns.style.display = 'none';
+}
+</script>
+
+{% endblock %}

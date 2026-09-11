@@ -1,0 +1,673 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    /* ==========================================================================
+       GLOBAL CSS VARIABLES & RESET OVERRIDES
+       ========================================================================== */
+    :root {
+        --admin-bg-bubble: #e0e7ff;
+        --admin-text-bubble: #1e1b4b;
+        --client-bg-bubble: #ffffff;
+        --client-text-bubble: #0f172a;
+        --surface-card: #ffffff;
+        --background-muted: #f8fafc;
+        --border-color: #e2e8f0;
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --primary-accent: #4f46e5;
+    }
+
+    .chat-container-wrapper {
+        max-width: 1280px;
+        margin: 30px auto;
+        padding: 0 20px;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    /* ==========================================================================
+       WORKSPACE CHAT INTERFACE GRID
+       ========================================================================== */
+    .chat-page {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 24px;
+        align-items: start;
+    }
+
+    @media (max-width: 992px) {
+        .chat-page {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Chat Area Core Containers */
+    .chat-section {
+        display: flex;
+        flex-direction: column;
+        background: var(--surface-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .chat-box {
+        height: 560px;
+        overflow-y: auto;
+        background: var(--background-muted);
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    /* ==========================================================================
+       CHAT BUBBLE TYPOGRAPHY & LAYOUTS
+       ========================================================================== */
+    .chat-row {
+        display: flex;
+        flex-direction: column;
+        max-width: 75%;
+    }
+
+    .chat-row.admin-sent {
+        align-self: flex-end;
+        align-items: flex-end;
+    }
+
+    .chat-row.client-sent {
+        align-self: flex-start;
+        align-items: flex-start;
+    }
+
+    .chat-bubble {
+        padding: 12px 16px;
+        border-radius: 16px;
+        font-size: 14.5px;
+        line-height: 1.5;
+        word-break: break-word;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .admin-sent .chat-bubble {
+        background: var(--admin-bg-bubble);
+        color: var(--admin-text-bubble);
+        border-bottom-right-radius: 4px;
+    }
+
+    .client-sent .chat-bubble {
+        background: var(--client-bg-bubble);
+        color: var(--client-text-bubble);
+        border: 1px solid var(--border-color);
+        border-bottom-left-radius: 4px;
+    }
+
+    .chat-time {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 4px;
+        padding: 0 4px;
+    }
+
+    /* Message Heading Context */
+    .msg-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .chat-avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .chat-avatar-fallback {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .msg-header strong {
+        font-size: 13px;
+        color: var(--text-main);
+    }
+
+    /* ==========================================================================
+       STATIONARY BOTTOM INPUT CONTAINER
+       ========================================================================== */
+    .chat-input {
+        background: var(--surface-card);
+        padding: 20px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .custom-input-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--background-muted);
+        border: 1px solid var(--border-color);
+        padding: 6px 12px;
+        border-radius: 24px;
+    }
+
+    .custom-input-group:focus-within {
+        border-color: #a5b4fc;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        background: #ffffff;
+    }
+
+    .custom-text-field {
+        flex: 1;
+        border: none;
+        background: transparent;
+        outline: none;
+        padding: 6px;
+        font-size: 14.5px;
+        color: var(--text-main);
+    }
+
+    .file-upload-btn-label {
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    .file-upload-btn-label:hover {
+        background: #e2e8f0;
+        color: var(--text-main);
+    }
+
+    .admin-send-action-btn {
+        background: var(--primary-accent);
+        color: #ffffff;
+        border: none;
+        padding: 8px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 18px;
+        transition: background 0.2s;
+    }
+
+    .admin-send-action-btn:hover {
+        background: #4338ca;
+    }
+
+    /* File upload status notification banner */
+    .file-status-indicator {
+        font-size: 12px;
+        color: var(--primary-accent);
+        margin-bottom: 6px;
+        padding-left: 12px;
+        display: none;
+        font-weight: 500;
+    }
+
+    /* ==========================================================================
+       SIDEBAR INFO CARDS
+       ========================================================================== */
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .card-box {
+        background: var(--surface-card);
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-box h6 {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 14px;
+        border-bottom: 1px solid var(--background-muted);
+        padding-bottom: 8px;
+    }
+
+    .profile-summary-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .profile-summary-header .chat-avatar, 
+    .profile-summary-header .chat-avatar-fallback {
+        width: 48px;
+        height: 48px;
+        font-size: 16px;
+    }
+
+    .meta-data-pair-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .label {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-top: 1px;
+    }
+
+    /* Image Thumbnails Configuration */
+    .image-preview img,
+    .ref-images img {
+        width: 72px;
+        height: 72px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid var(--border-color);
+    }
+
+    .image-preview img:hover,
+    .ref-images img:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .ref-images {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .measurement-pills-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .measurement-pill {
+        background: var(--background-muted);
+        border: 1px solid var(--border-color);
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+    }
+
+    /* ==========================================================================
+       AI ASSISTANT SIDEBAR SUITE
+       ========================================================================== */
+    .ai-box {
+        background: #fafafa;
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 14px;
+    }
+
+    .ai-messages {
+        max-height: 160px;
+        overflow-y: auto;
+        margin-bottom: 12px;
+        font-size: 13px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding-right: 4px;
+    }
+
+    .ai-bubble-row {
+        padding: 8px 12px;
+        border-radius: 10px;
+        max-width: 85%;
+        line-height: 1.4;
+    }
+
+    .ai-user {
+        background: #e2e8f0;
+        color: #1e293b;
+        align-self: flex-end;
+    }
+
+    .ai-reply {
+        background: #e0e7ff;
+        color: #1e1b4b;
+        align-self: flex-start;
+    }
+
+    #imgModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(8px);
+    }
+
+    #imgModal img {
+        max-width: 85%;
+        max-height: 85vh;
+        border-radius: 12px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    #closeBtn {
+        position: absolute;
+        top: 24px;
+        right: 32px;
+        font-size: 36px;
+        color: #ffffff;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+
+    #closeBtn:hover { opacity: 1; }
+
+    /* Custom Order State Badge styles */
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+</style>
+
+<div class="container-wrapper chat-container-wrapper mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-dark mb-1">Admin Communication Hub</h4>
+            <span class="text-muted small">Tracking Order Customization Specs</span>
+        </div>
+        <span class="status-badge bg-primary text-white">
+            {{ custom_order.status|upper }}
+        </span>
+    </div>
+
+    <div class="chat-page">
+
+        <div class="chat-section">
+            <div class="chat-box" id="chatBox">
+                {% for msg in messages %}
+                    <div class="chat-row {% if msg.sender == request.user %}admin-sent{% else %}client-sent{% endif %}">
+                        
+                        <div class="msg-header">
+                            {% if msg.sender.profile.profile_image %}
+                                <img src="{{ msg.sender.profile.profile_image.url }}" class="chat-avatar" alt="Avatar">
+                            {% else %}
+                                <div class="chat-avatar-fallback">
+                                    {{ msg.sender.username|first|upper }}
+                                </div>
+                            {% endif %}
+                            <strong>
+                                {% if msg.sender == request.user %}
+                                    You (Admin)
+                                {% else %}
+                                    {{ msg.sender.username }}
+                                {% endif %}
+                            </strong>
+                        </div>
+
+                        <div class="chat-bubble">
+                            {% if msg.content %}
+                                <div>{{ msg.content }}</div>
+                            {% endif %}
+
+                            {% if msg.image %}
+                                <div class="image-preview mt-2">
+                                    <img src="{{ msg.image.url }}" onclick="openModal(this)" alt="Attached Preview Layout">
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="chat-time">
+                            {{ msg.created_at|timesince }} ago
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center my-auto py-5 text-muted">
+                        <p class="small mb-0">No active discussion log for this customized order item yet.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="chat-input">
+                <div class="file-status-indicator" id="fileStatusIndicator">📎 Attachment staged for upload...</div>
+                <form method="POST" enctype="multipart/form-data" action="{% url 'send_message' custom_order.id %}" id="chatMessageForm">
+                    {% csrf_token %}
+                    <div class="custom-input-group">
+                        <label class="file-upload-btn-label" title="Attach Specifications">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                            <input type="file" name="image" id="adminFileInput" hidden onchange="processFileIndicator()">
+                        </label>
+                        <input type="text" name="message" class="custom-text-field" placeholder="Write a response or updates explanation..." id="chatTextField">
+                        <button type="submit" class="admin-send-action-btn">Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="sidebar">
+
+            <div class="card-box">
+                <h6>Customer Summary</h6>
+                <div class="profile-summary-header">
+                    {% if custom_order.user.profile.profile_image %}
+                        <img src="{{ custom_order.user.profile.profile_image.url }}" class="chat-avatar" alt="User image Profile">
+                    {% else %}
+                        <div class="chat-avatar-fallback">
+                            {{ custom_order.user.username|first|upper }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <div class="value" style="font-size:15px;">{{ custom_order.user.username }}</div>
+                        <span class="text-muted small">Client Account</span>
+                    </div>
+                </div>
+
+                <div class="meta-data-pair-grid">
+                    <div class="meta-item">
+                        <span class="label">Contact Phone</span>
+                        <span class="value">{{ custom_order.phone_number }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="label">Shipping Address Target</span>
+                        <span class="value" style="line-height:1.4;">{{ custom_order.address }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-box">
+                <h6>Design Order Matrix</h6>
+                <div class="meta-data-pair-grid mb-3">
+                    <div class="meta-item">
+                        <span class="label">Selected Kurtha Design</span>
+                        <span class="value">{{ custom_order.kurtha_name }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="label">Commitment Delivery Date Target</span>
+                        <span class="value">{{ custom_order.delivery_date }}</span>
+                    </div>
+                </div>
+
+                {% if custom_order.order_details %}
+                    <div class="meta-item mb-3">
+                        <span class="label">Special Instructions Details</span>
+                        <span class="value style-details-block" style="font-weight: 400; line-height:1.4;">{{ custom_order.order_details }}</span>
+                    </div>
+                {% endif %}
+
+                {% if custom_order.images.all %}
+                    <div class="label mb-1">Customer Reference Lookbooks</div>
+                    <div class="ref-images">
+                        {% for img in custom_order.images.all %}
+                            <img src="{{ img.image.url }}" onclick="openModal(this)" alt="Specs Asset Attachments">
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="card-box">
+                <h6>Tailoring Measurements</h6>
+                <div class="measurement-pills-container">
+                    <div class="measurement-pill">
+                        <span class="label">Bust</span>
+                        <div class="value">{{ custom_order.bust }} in</div>
+                    </div>
+                    <div class="measurement-pill">
+                        <span class="label">Waist</span>
+                        <div class="value">{{ custom_order.waist }} in</div>
+                    </div>
+                    <div class="measurement-pill">
+                        <span class="label">Hip</span>
+                        <div class="value">{{ custom_order.hip }} in</div>
+                    </div>
+                    <div class="measurement-pill">
+                        <span class="label">Height</span>
+                        <div class="value">{{ custom_order.height }} in</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-box">
+                <h6>Order Pipeline State Control</h6>
+                <form method="POST" action="{% url 'update_custom_order_status' custom_order.id %}">
+                    {% csrf_token %}
+                    <select name="status" class="form-select mb-2 text-dark bg-white" style="font-size:14px; border-radius:8px;">
+                        {% for key, value in status_choices %}
+                            <option value="{{ key }}" {% if custom_order.status == key %}selected{% endif %}>
+                                {{ value }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button class="btn btn-dark btn-sm w-100 py-2" style="border-radius:8px; font-weight:600;">Update Status Code</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="imgModal" onclick="closeModal()">
+    <span id="closeBtn" onclick="closeModal()">&times;</span>
+    <img id="modalImg" alt="Enlarged Visual Frame">
+</div>
+
+<script>
+    function openModal(img) {
+        document.getElementById("imgModal").style.display = "flex";
+        document.getElementById("modalImg").src = img.src;
+    }
+
+    function closeModal() {
+        document.getElementById("imgModal").style.display = "none";
+    }
+
+    function autoScrollActiveChat() {
+        const box = document.getElementById("chatBox");
+        if(box) {
+            box.scrollTop = box.scrollHeight;
+        }
+    }
+    window.onload = autoScrollActiveChat;
+
+    function processFileIndicator() {
+        const fileInput = document.getElementById('adminFileInput');
+        const fileStatus = document.getElementById('fileStatusIndicator');
+        if (fileInput.files.length > 0) {
+            fileStatus.innerText = `📎 Staged: ${fileInput.files[0].name}`;
+            fileStatus.style.display = 'block';
+        }
+    }
+
+    /* Client Form empty validator catch interceptor */
+    document.getElementById("chatMessageForm").addEventListener("submit", function(e) {
+        const txtValue = document.getElementById("chatTextField").value.trim();
+        const fileValue = document.getElementById("adminFileInput").value;
+        if (!txtValue && !fileValue) {
+            e.preventDefault();
+            alert("Please type a textual description message or select a file asset specification context.");
+        }
+    });
+</script>
+
+<script>
+    function askAI() {
+        let message = document.getElementById("aiInput").value;
+        let chatBox = document.getElementById("aiMessages");
+        let csrfToken = "{{ csrf_token }}";
+        if (!message.trim()) return;
+
+        // Render localized interactive DOM frame nodes
+        chatBox.innerHTML += `
+            <div class="ai-bubble-row ai-user">
+                ${message}
+            </div>
+        `;
+        document.getElementById("aiInput").value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        fetch("/ai-chat/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: "message=" + encodeURIComponent(message)
+        })
+        .then(res => res.json())
+        .then(data => {
+            chatBox.innerHTML += `
+                <div class="ai-bubble-row ai-reply">
+                    ${data.reply}
+                </div>
+            `;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        })
+        .catch(error => {
+            chatBox.innerHTML += `
+                <div class="ai-bubble-row ai-reply text-danger" style="background:#ffeeef;">
+                    AI co-pilot connection exception error occurred.
+                </div>
+            `;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    }
+</script>
+
+{% endblock %}

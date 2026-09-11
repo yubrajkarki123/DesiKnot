@@ -1,0 +1,298 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+.ua-wrapper{ background: #f6f7fb; }
+
+.ua-card{
+    background: #fff;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    height: 100%;
+}
+
+.ua-card h6{
+    color: #888;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ua-card .value{
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-top: 6px;
+}
+
+.ua-card .icon{
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 12px;
+}
+
+.icon-green{ background: rgba(25,135,84,0.1); color: #198754; }
+.icon-blue{ background: rgba(13,110,253,0.1); color: #0d6efd; }
+.icon-gold{ background: rgba(201,161,59,0.15); color: #c9a13b; }
+.icon-purple{ background: rgba(139,92,246,0.12); color: #8b5cf6; }
+
+.live-dot{
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #22c55e;
+    display: inline-block;
+    margin-right: 6px;
+    box-shadow: 0 0 0 0 rgba(34,197,94,0.6);
+    animation: pulse-dot 1.6s infinite;
+}
+
+@keyframes pulse-dot{
+    0%{ box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+    70%{ box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+
+.chart-card{
+    background: #fff;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+}
+
+.online-table th{
+    color: #888;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    border-bottom: 2px solid #eee;
+    padding: 12px 10px;
+}
+
+.online-table td{
+    padding: 12px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.mini-avatar{
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#198754,#20c997);
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.role-badge{
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.role-owner{ background: rgba(201,161,59,0.15); color: #c9a13b; }
+.role-customer{ background: rgba(25,135,84,0.1); color: #198754; }
+.role-admin{ background: rgba(220,53,69,0.1); color: #dc3545; }
+
+.empty-note{
+    text-align: center;
+    color: #999;
+    padding: 30px 0;
+    font-style: italic;
+}
+
+</style>
+
+<div class="ua-wrapper py-4">
+<div class="container">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <h2 class="fw-bold mb-0">👥 User Activity</h2>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-3 col-sm-6">
+            <div class="ua-card">
+                <div class="icon icon-blue"><i class="bi bi-people-fill"></i></div>
+                <h6>Total Users</h6>
+                <div class="value">{{ total_users }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="ua-card">
+                <div class="icon icon-green"><i class="bi bi-broadcast"></i></div>
+                <h6><span class="live-dot"></span>Online Now</h6>
+                <div class="value">{{ online_now }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="ua-card">
+                <div class="icon icon-gold"><i class="bi bi-calendar-day"></i></div>
+                <h6>New Today</h6>
+                <div class="value">{{ new_today }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="ua-card">
+                <div class="icon icon-purple"><i class="bi bi-calendar-week"></i></div>
+                <h6>New This Week</h6>
+                <div class="value">{{ new_this_week }}</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-4 mb-4">
+
+        <!-- SIGNUP TREND CHART -->
+        <div class="col-lg-8">
+            <div class="chart-card h-100">
+                <h5 class="fw-bold mb-3">New Signups — Last 30 Days</h5>
+                {% if chart_labels %}
+                    <canvas id="signupChart" height="100"></canvas>
+                {% else %}
+                    <div class="empty-note">No signups recorded in the last 30 days.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ROLE BREAKDOWN -->
+        <div class="col-lg-4">
+            <div class="ua-card">
+                <h5 class="fw-bold mb-3">Users by Role</h5>
+                {% for r in role_breakdown %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="role-badge role-{{ r.role }}">{{ r.role }}</span>
+                    <strong>{{ r.count }}</strong>
+                </div>
+                {% empty %}
+                <div class="empty-note">No users yet.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ONLINE NOW TABLE -->
+    <div class="ua-card mb-4">
+        <h5 class="fw-bold mb-3"><span class="live-dot"></span>Currently Online (active in last 5 min)</h5>
+
+        {% if online_users %}
+        <div class="table-responsive">
+            <table class="table online-table mb-0">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Last Active</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in online_users %}
+                    <tr>
+                        <td><div class="mini-avatar">{{ p.user.username|slice:":1"|upper }}</div></td>
+                        <td>{{ p.user.username }}</td>
+                        <td><span class="role-badge role-{{ p.display_role }}">{{ p.display_role }}</span></td>
+                        <td>{{ p.last_seen|timesince }} ago</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-note">No one is online right now.</div>
+        {% endif %}
+    </div>
+
+    <!-- RECENTLY ACTIVE -->
+    <div class="ua-card">
+        <h5 class="fw-bold mb-3">Recently Active (last 24 hours)</h5>
+
+        {% if recently_active %}
+        <div class="table-responsive">
+            <table class="table online-table mb-0">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Last Active</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in recently_active %}
+                    <tr>
+                        <td><div class="mini-avatar">{{ p.user.username|slice:":1"|upper }}</div></td>
+                        <td>{{ p.user.username }}</td>
+                        <td><span class="role-badge role-{{ p.display_role }}">{{ p.display_role }}</span></td>
+                        <td>{{ p.last_seen|timesince }} ago</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-note">No other activity in the last 24 hours.</div>
+        {% endif %}
+    </div>
+
+</div>
+</div>
+
+{% if chart_labels %}
+{{ chart_labels|json_script:"ua-chart-labels" }}
+{{ chart_values|json_script:"ua-chart-values" }}
+
+<script>
+const uaLabels = JSON.parse(document.getElementById('ua-chart-labels').textContent);
+const uaValues = JSON.parse(document.getElementById('ua-chart-values').textContent);
+
+const ctx = document.getElementById('signupChart').getContext('2d');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: uaLabels,
+        datasets: [{
+            label: 'New Signups',
+            data: uaValues,
+            backgroundColor: '#198754',
+            borderRadius: 6,
+            maxBarThickness: 28
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+});
+</script>
+{% endif %}
+
+{% endblock %}

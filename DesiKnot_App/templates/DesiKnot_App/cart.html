@@ -1,0 +1,234 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-5">
+
+    <h2 class="mb-4 text-center fw-bold">🛒 Your Shopping Cart</h2>
+
+    {% if products_in_cart %}
+
+    <div class="card shadow-lg p-4 border-0 rounded-4">
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="table-responsive">
+
+                <table class="table align-middle text-center" id="cart-table">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-start">Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Subtotal</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for item in products_in_cart %}
+                        <tr data-product-id="{{ item.product.id }}">
+
+                            <!-- PRODUCT -->
+                            <td class="text-start d-flex align-items-center gap-2">
+
+                                {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}"
+                                     alt="{{ item.product.name }}"
+                                     style="width:55px;height:55px;object-fit:cover;border-radius:8px;">
+                                {% else %}
+                                <img src="{% static 'images/logo.jpeg' %}"
+                                     style="width:55px;height:55px;object-fit:cover;border-radius:8px;">
+                                {% endif %}
+
+                                <span class="fw-medium">
+                                    {{ item.product.name }}
+                                </span>
+
+                            </td>
+
+                            <!-- PRICE -->
+                            <td class="product-price fw-semibold">
+                            {{ item.product.discounted_price }}
+                            </td>
+
+                            <!-- QUANTITY -->
+                            <td>
+                                <input type="number"
+                                       name="quantity_{{ item.product.id }}"
+                                       value="{{ item.quantity }}"
+                                       min="1"
+                                       class="form-control text-center quantity-input"
+                                       style="width:80px;margin:auto;">
+                            </td>
+
+                            <!-- SUBTOTAL -->
+                            <td class="product-subtotal fw-semibold">
+                                {{ item.subtotal }}
+                            </td>
+
+                            <!-- REMOVE -->
+                            <td>
+                                <button type="button"
+                                        class="btn btn-sm btn-danger remove-btn"
+                                        data-id="{{ item.product.id }}">
+                                    Remove
+                                </button>
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+
+                        <!-- TOTAL ROW -->
+                        <tr class="table-success fw-bold">
+                            <td colspan="3" class="text-end">Total:</td>
+                            <td id="cart-total">
+                                Rs {{ total }}
+                            </td>
+                            <td></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="d-flex justify-content-end mt-4 gap-2 flex-wrap">
+
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg">
+                    Back to home
+                </a>
+
+                <button type="submit"
+                        name="action"
+                        value="checkout"
+                        class="btn btn-primary btn-lg">
+                    Proceed
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    {% else %}
+
+    <!-- EMPTY CART -->
+    <div class="card shadow-lg p-5 text-center border-0 rounded-4">
+
+        <h4 class="mb-2">Your cart is empty 🛒</h4>
+        <p class="text-muted">Start shopping to add items here.</p>
+
+        <a href="{% url 'home' %}" class="btn btn-dark btn-lg mt-3">
+            Go Shopping
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+<style>
+.table td, .table th {
+    vertical-align: middle;
+}
+
+.btn-lg {
+    min-width: 160px;
+}
+
+#cart-table img {
+    transition: 0.3s;
+}
+
+#cart-table tr:hover img {
+    transform: scale(1.05);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    
+    const quantityInputs = document.querySelectorAll('.quantity-input');
+    const totalDisplay = document.getElementById('cart-total');
+
+    function updateCartTotals() {
+        let total = 0;
+
+        quantityInputs.forEach(input => {
+
+            const row = input.closest('tr');
+
+            const price = parseFloat(
+                row.querySelector('.product-price').textContent
+            );
+
+            const quantity = parseInt(input.value) || 1;
+
+            const subtotal = price * quantity;
+
+            row.querySelector('.product-subtotal').textContent =
+                subtotal.toFixed(2);
+
+            total += subtotal;
+        });
+
+        totalDisplay.textContent = 'Rs ' + total.toFixed(2);
+    }
+
+    quantityInputs.forEach(input => {
+        input.addEventListener('input', updateCartTotals);
+    });
+
+
+    // =========================
+    // REMOVE ITEM (FIXED)
+    // =========================
+    document.querySelectorAll('.remove-btn').forEach(btn => {
+
+        btn.addEventListener('click', function () {
+
+            const productId = this.dataset.id;
+            const row = this.closest('tr');
+
+            fetch(`/cart/remove/${productId}/`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Failed request");
+                    }
+                    return response.text();
+                })
+                .then(() => {
+
+                    // smooth remove animation
+                    if (row) {
+                        row.style.transition = "0.3s";
+                        row.style.opacity = "0";
+                        row.style.transform = "translateX(20px)";
+                    }
+
+                    setTimeout(() => {
+                        location.reload();
+                    }, 300);
+
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("Could not remove item. Try again.");
+                });
+
+        });
+
+    });
+
+});
+</script>
+
+{% endblock %}

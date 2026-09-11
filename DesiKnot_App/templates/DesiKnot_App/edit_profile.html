@@ -1,0 +1,124 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+.profile-wrapper {
+    max-width: 750px;
+    margin: auto;
+}
+
+.profile-card {
+    border-radius: 16px;
+    border: 1px solid #eee;
+    padding: 25px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+}
+
+.profile-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #0d6efd;
+}
+
+.upload-label {
+    display: block;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.form-control {
+    border-radius: 10px;
+    padding: 10px;
+}
+</style>
+
+<div class="container my-5 profile-wrapper">
+
+    <h3 class="text-center fw-bold mb-4">Edit Profile</h3>
+
+    <div class="profile-card">
+
+        
+        <div class="text-center mb-4">
+
+            {% if profile.profile_image %}
+                <img src="{{ profile.profile_image.url }}" class="profile-img" id="previewImage">
+            {% else %}
+                <img src="{% static 'DesiKnot_App/images/default-avatar.png' %}" class="profile-img" id="previewImage">
+            {% endif %}
+
+            <label class="upload-label">Change Profile Photo (Max 1MB)</label>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- PROFILE IMAGE -->
+            <div class="mb-3">
+                <input type="file" name="profile_image" class="form-control" accept="image/*"
+                       onchange="previewFile(event)">
+            </div>
+
+            <!-- FIRST NAME -->
+            <div class="mb-3">
+                <label class="form-label">First Name</label>
+                <input type="text" name="first_name"
+                       value="{{ user.first_name }}"
+                       class="form-control" required>
+            </div>
+
+            <!-- LAST NAME -->
+            <div class="mb-3">
+                <label class="form-label">Last Name</label>
+                <input type="text" name="last_name"
+                       value="{{ user.last_name }}"
+                       class="form-control" required>
+            </div>
+
+            <!-- EMAIL -->
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email"
+                       value="{{ user.email }}"
+                       class="form-control" required>
+            </div>
+
+            <!-- PHONE -->
+            <div class="mb-3">
+                <label class="form-label">Phone</label>
+                <input type="text" name="phone"
+                       value="{{ profile.phone }}"
+                       class="form-control">
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'profile' %}" class="btn btn-outline-secondary">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    Save Changes
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+function previewFile(event) {
+    const reader = new FileReader();
+    reader.onload = function(){
+        document.getElementById('previewImage').src = reader.result;
+    }
+    reader.readAsDataURL(event.target.files[0]);
+}
+</script>
+
+{% endblock %}

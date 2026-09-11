@@ -1,0 +1,459 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+
+/* =========================
+   WRAPPER
+========================= */
+.admin-wrapper {
+    max-width: 1100px;
+    margin: auto;
+}
+
+/* =========================
+   HEADER
+========================= */
+.admin-header {
+    margin-bottom: 25px;
+}
+
+.admin-header h3 {
+    font-weight: 700;
+}
+
+.admin-header p {
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+/* =========================
+   PROFESSIONAL SEARCH
+========================= */
+
+.search-container {
+    margin-bottom: 25px;
+}
+
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e1e5eb;
+    border-radius: 14px;
+    padding: 4px 8px;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.05);
+    transition: 0.3s ease;
+}
+
+.search-box:focus-within {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13,110,253,0.10);
+}
+
+.search-icon {
+    font-size: 18px;
+    margin-left: 10px;
+    color: #6c757d;
+}
+
+.search-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 13px 12px;
+    font-size: 14px;
+    background: transparent;
+}
+
+.search-box input::placeholder {
+    color: #9aa0a6;
+}
+
+.clear-search {
+    display: none;
+    border: none;
+    background: #f1f3f5;
+    color: #6c757d;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.clear-search:hover {
+    background: #dee2e6;
+    color: #000;
+}
+
+.search-info {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+/* =========================
+   ORDER CARD
+========================= */
+.order-card {
+    border-radius: 14px;
+    border: 1px solid #eee;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: 0.25s ease;
+    background: #fff;
+}
+
+.order-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+/* =========================
+   UNREAD STYLE
+========================= */
+.order-card.unread {
+    border-left: 5px solid #0d6efd;
+    background: #eef4ff;
+}
+
+.order-card.unread .order-title {
+    font-weight: 700;
+    color: #000;
+}
+
+.order-card.unread .meta {
+    color: #000;
+    font-weight: 500;
+}
+
+/* =========================
+   TOP ROW
+========================= */
+.order-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* =========================
+   CUSTOMER BLOCK (NEW FIX)
+========================= */
+.customer-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+/* avatar */
+.avatar-img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #0d6efd;
+}
+
+/* fallback avatar */
+.avatar-fallback {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0d6efd, #6610f2);
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* =========================
+   TEXT
+========================= */
+.order-title {
+    font-weight: 600;
+    margin: 0;
+}
+
+.customer {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+/* =========================
+   STATUS
+========================= */
+.status-badge {
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+/* =========================
+   META
+========================= */
+.meta {
+    font-size: 13px;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+/* =========================
+   LATEST MESSAGE
+========================= */
+.latest-message {
+    font-size: 14px;
+}
+
+.order-card.unread .latest-message {
+    font-weight: 600;
+    color: #000;
+}
+
+/* =========================
+   BUTTON
+========================= */
+.open-btn {
+    margin-top: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* =========================
+   EMPTY
+========================= */
+.empty-box {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f8f9fa;
+    border-radius: 14px;
+    color: #6c757d;
+}
+
+</style>
+
+<div class="container mt-4 admin-wrapper">
+
+    <!-- HEADER -->
+    <div class="admin-header">
+        <h3>Admin Dashboard</h3>
+        <p>Manage all customer orders and conversations</p>
+    </div>
+
+    <!-- SEARCH -->
+<div class="search-container">
+
+    <div class="search-box">
+        <span class="search-icon">🔍</span>
+
+        <input
+            type="text"
+            id="customerSearch"
+            placeholder="Search customer, order, product..."
+            autocomplete="off"
+        >
+
+        <button type="button" id="clearSearch" class="clear-search">
+            ×
+        </button>
+    </div>
+
+    <div class="search-info">
+        <span id="searchResultText">Showing all conversations</span>
+    </div>
+
+</div>
+
+    <!-- ORDERS -->
+    {% for order in orders|dictsortreversed:"created_at" %}
+
+    <div class="order-card searchable-order {% if order.has_unread %}unread{% endif %}"></div>
+        <!-- TOP -->
+        <div class="order-top">
+
+            <div>
+
+                <p class="order-title">
+                    Order #{{ order.id }} - {{ order.kurtha_name }}
+                </p>
+
+                <!-- CUSTOMER WITH AVATAR -->
+                <div class="customer-box">
+
+                    {% if order.user.profile.profile_image %}
+                        <img src="{{ order.user.profile.profile_image.url }}"
+                             class="avatar-img">
+                    {% else %}
+                        <div class="avatar-fallback">
+                            {{ order.user.username|first|upper }}
+                        </div>
+                    {% endif %}
+
+                    <span class="customer">
+                        {{ order.user.username }}
+                    </span>
+
+                </div>
+
+            </div>
+
+            <!-- STATUS -->
+            <div>
+                {% if order.status == 'approved' %}
+                    <span class="status-badge bg-success text-white">APPROVED</span>
+                {% elif order.status == 'rejected' %}
+                    <span class="status-badge bg-danger text-white">REJECTED</span>
+                {% elif order.status == 'ready' %}
+                    <span class="status-badge bg-primary text-white">READY</span>
+                {% else %}
+                    <span class="status-badge bg-warning text-dark">
+                        {{ order.status|upper }}
+                    </span>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <!-- META -->
+        <div class="meta">
+            📍 {{ order.address }} <br>
+            📅 {{ order.created_at|date:"M d, Y H:i" }}
+        </div>
+
+        <!-- LAST MESSAGE -->
+        <div class="meta mt-2 latest-message">
+            💬
+            {% with last_msg=order.messages.last %}
+                {% if last_msg %}
+                    {% if last_msg.content %}
+                        {{ last_msg.content|truncatechars:60 }}
+                    {% else %}
+                        📎 Image message
+                    {% endif %}
+                {% else %}
+                    No messages yet
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- OPEN CHAT -->
+        <a href="{% url 'order_chat' order.id %}"
+           class="btn btn-primary open-btn w-100">
+            Open Conversation →
+        </a>
+
+    </div>
+
+    {% empty %}
+
+    <div class="empty-box">
+        <h5>No orders found</h5>
+        <p>New customer orders will appear here.</p>
+    </div>
+
+    {% endfor %}
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const searchInput = document.getElementById("customerSearch");
+    const clearButton = document.getElementById("clearSearch");
+    const resultText = document.getElementById("searchResultText");
+
+    const orders = document.querySelectorAll(".searchable-order");
+
+    function performSearch() {
+
+        const searchValue = searchInput.value.toLowerCase().trim();
+
+        let visibleCount = 0;
+
+        orders.forEach(function (order) {
+
+            const orderText = order.textContent.toLowerCase();
+
+            if (orderText.includes(searchValue)) {
+
+                order.style.display = "";
+
+                visibleCount++;
+
+            } else {
+
+                order.style.display = "none";
+
+            }
+
+        });
+
+        /* Clear button */
+
+        if (searchValue.length > 0) {
+            clearButton.style.display = "block";
+        } else {
+            clearButton.style.display = "none";
+        }
+
+        /* Result information */
+
+        if (searchValue === "") {
+
+            resultText.textContent =
+                "Showing all " + orders.length + " conversations";
+
+        } else if (visibleCount === 0) {
+
+            resultText.textContent =
+                "No conversations found for \"" + searchInput.value + "\"";
+
+        } else {
+
+            resultText.textContent =
+                "Found " + visibleCount + " conversation" +
+                (visibleCount !== 1 ? "s" : "");
+
+        }
+
+    }
+
+
+    /* Search while typing */
+
+    searchInput.addEventListener("input", performSearch);
+
+
+    /* Clear search */
+
+    clearButton.addEventListener("click", function () {
+
+        searchInput.value = "";
+
+        performSearch();
+
+        searchInput.focus();
+
+    });
+
+
+    /* Initial result */
+
+    performSearch();
+
+});
+
+</script>
+
+{% endblock %}

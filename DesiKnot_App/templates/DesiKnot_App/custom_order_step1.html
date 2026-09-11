@@ -1,0 +1,152 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-5" style="max-width:720px;">
+
+    <!-- ========================= -->
+    <!-- HEADER -->
+    <!-- ========================= -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-success">🧵 Custom Tailoring Order</h2>
+        <p class="text-muted mb-1">Step 1 of 2 — Basic Information</p>
+
+        <div class="progress" style="height:7px; border-radius:20px;">
+            <div class="progress-bar bg-success" style="width:50%"></div>
+        </div>
+    </div>
+
+    <div class="card shadow-lg border-0 p-4 rounded-4">
+
+        <!-- ========================= -->
+        <!-- ALERTS -->
+        <!-- ========================= -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- ========================= -->
+        <!-- FORM -->
+        <!-- ========================= -->
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Hidden step tracker -->
+            <input type="hidden" name="step" value="1">
+
+            <!-- ========================= -->
+            <!-- ORDER INFO -->
+            <!-- ========================= -->
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3">👗 Order Details</h5>
+
+                <label class="form-label">Kurtha / Dress Name *</label>
+                <input type="text"
+                       class="form-control rounded-3"
+                       name="kurtha_name"
+                       placeholder="Enter the name of the Kurtha"
+                       required>
+            </div>
+
+            <!-- ========================= -->
+            <!-- CONTACT INFO -->
+            <!-- ========================= -->
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3">📞 Contact Information</h5>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="tel"
+                               class="form-control rounded-3"
+                               name="phone_number"
+                               placeholder="Primary number"
+                               required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Alternate Number</label>
+                        <input type="tel"
+                               class="form-control rounded-3"
+                               name="alt_phone_number"
+                               placeholder="Optional">
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ========================= -->
+            <!-- ADDRESS -->
+            <!-- ========================= -->
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3">📍 Delivery Address</h5>
+
+                <textarea class="form-control rounded-3"
+                          name="address"
+                          rows="3"
+                          placeholder="Enter full delivery address (street, city, landmark...)"
+                          required></textarea>
+
+                <small class="text-muted">
+                    Please provide accurate address for smooth delivery
+                </small>
+            </div>
+
+            <!-- ========================= -->
+            <!-- INFO BOX -->
+            <!-- ========================= -->
+            <div class="alert alert-light border rounded-3 mb-4">
+                <strong>Next Step:</strong> You will enter measurements like bust, waist, hip, shoulder, and upload reference images.
+            </div>
+
+            <!-- ========================= -->
+            <!-- BUTTON -->
+            <!-- ========================= -->
+            <div class="d-grid">
+                <button type="submit" class="btn btn-success btn-lg rounded-3 fw-semibold">
+                    Continue to Measurements →
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- STYLES -->
+<!-- ========================= -->
+<style>
+.card {
+    transition: 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+.form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.15rem rgba(40,167,69,0.2);
+}
+
+.progress {
+    overflow: hidden;
+}
+
+.btn-success {
+    transition: 0.3s ease;
+}
+
+.btn-success:hover {
+    transform: scale(1.02);
+}
+</style>
+
+{% endblock %}

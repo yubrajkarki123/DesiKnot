@@ -1,0 +1,733 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+    --ink:        #0d1117;
+    --ink-soft:   #4b5563;
+    --ink-faint:  #9ca3af;
+    --surface:    #ffffff;
+    --surface-2:  #f9fafb;
+    --border:     #e5e7eb;
+
+    --green:      #16a34a;
+    --green-bg:   #f0fdf4;
+    --green-bdr:  #bbf7d0;
+    --green-dark: #14532d;
+
+    --amber:      #d97706;
+    --amber-bg:   #fffbeb;
+    --amber-bdr:  #fde68a;
+    --amber-dark: #78350f;
+
+    --red:        #dc2626;
+    --red-bg:     #fef2f2;
+    --red-bdr:    #fca5a5;
+    --red-dark:   #7f1d1d;
+
+    --blue:       #2563eb;
+    --blue-bg:    #eff6ff;
+    --blue-bdr:   #bfdbfe;
+    --blue-dark:  #1e3a8a;
+
+    --purple:     #7c3aed;
+    --purple-bg:  #f5f3ff;
+    --purple-bdr: #ddd6fe;
+    --purple-dark:#3b0764;
+
+    --r-sm: 10px;
+    --r-md: 14px;
+    --r-lg: 18px;
+    --shadow-sm: 0 1px 6px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+}
+
+body { background: #f3f4f6; }
+
+.dash-page {
+    font-family: 'Poppins', sans-serif;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 16px 64px;
+    color: var(--ink);
+}
+
+/* HERO */
+.dash-hero {
+    background: var(--ink);
+    border-radius: var(--r-lg);
+    padding: 28px 28px 24px;
+    margin-bottom: 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.dash-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(22,163,74,0.10);
+    pointer-events: none;
+}
+
+.dash-hero h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 5px;
+    position: relative;
+}
+
+.dash-hero p {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.45);
+    margin: 0;
+    position: relative;
+}
+
+/* STATS */
+.dash-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.dash-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-sm);
+}
+
+.dash-stat-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.dash-stat-num {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.dash-stat-lbl {
+    font-size: 0.68rem;
+    color: var(--ink-faint);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+/* SECTION LABEL */
+.section-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 14px;
+    margin-top: 28px;
+}
+
+.section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+/* ORDER CARD */
+.order-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.18s, transform 0.18s;
+}
+
+.order-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+/* CARD TOP */
+.card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.card-top-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.order-id {
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--ink);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+}
+
+.customer-info strong {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.customer-info small {
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    display: block;
+    margin-top: 1px;
+}
+
+.card-top-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* CHIPS */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.chip-pending     { background: var(--amber-bg);  color: var(--amber-dark); border: 1px solid var(--amber-bdr); }
+.chip-approved    { background: var(--blue-bg);   color: var(--blue-dark);  border: 1px solid var(--blue-bdr); }
+.chip-shipped     { background: var(--purple-bg); color: var(--purple-dark);border: 1px solid var(--purple-bdr); }
+.chip-completed   { background: var(--green-bg);  color: var(--green-dark); border: 1px solid var(--green-bdr); }
+.chip-cancelled   { background: var(--red-bg);    color: var(--red-dark);   border: 1px solid var(--red-bdr); }
+.chip-cancel-req  { background: var(--red-bg);    color: var(--red-dark);   border: 1px solid var(--red-bdr); }
+.chip-refund-proc { background: var(--amber-bg);  color: var(--amber-dark); border: 1px solid var(--amber-bdr); }
+.chip-refunded    { background: var(--green-bg);  color: var(--green-dark); border: 1px solid var(--green-bdr); }
+.chip-cod         { background: var(--blue-bg);   color: var(--blue-dark);  border: 1px solid var(--blue-bdr); }
+.chip-qr          { background: var(--purple-bg); color: var(--purple-dark);border: 1px solid var(--purple-bdr); }
+
+.order-date {
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    font-weight: 500;
+}
+
+/* CARD BODY */
+.card-body {
+    padding: 16px 18px;
+    display: grid;
+    grid-template-columns: 1fr 180px;
+    gap: 16px;
+    align-items: start;
+}
+
+/* PRODUCT ROWS */
+.product-list { display: flex; flex-direction: column; gap: 7px; }
+
+.product-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+}
+
+.product-thumb {
+    width: 46px; height: 46px;
+    border-radius: 7px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.product-name { font-size: 0.82rem; font-weight: 600; }
+.product-meta { font-size: 0.7rem; color: var(--ink-faint); margin-top: 2px; }
+
+/* PRICING PANEL */
+.pricing-panel {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    font-size: 0.76rem;
+}
+
+.pricing-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.pricing-row:last-child { border-bottom: none; }
+.pricing-row .lbl { color: var(--ink-faint); }
+.pricing-row .val { font-weight: 700; }
+
+.pricing-row.total { background: var(--ink); padding: 9px 12px; }
+.pricing-row.total .lbl,
+.pricing-row.total .val { color: #fff; font-size: 0.8rem; }
+
+/* CARD FOOTER — STATUS UPDATE + ACTIONS */
+.card-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.footer-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* STATUS SELECT FORM */
+.status-form {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.status-select {
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 7px 10px;
+    font-size: 0.78rem;
+    font-family: 'Poppins', sans-serif;
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s;
+    min-width: 160px;
+}
+
+.status-select:focus { border-color: #9ca3af; }
+
+.btn-update {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: var(--r-sm);
+    padding: 7px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.18s;
+    white-space: nowrap;
+}
+
+.btn-update:hover { opacity: 0.82; }
+
+/* CANCELLATION ACTION BUTTONS */
+.btn-approve {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--green-bg);
+    color: var(--green-dark);
+    border: 1px solid var(--green-bdr);
+    border-radius: var(--r-sm);
+    padding: 7px 13px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.18s;
+    white-space: nowrap;
+}
+
+.btn-approve:hover { background: #dcfce7; color: var(--green-dark); }
+
+.btn-refund {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--purple-bg);
+    color: var(--purple-dark);
+    border: 1px solid var(--purple-bdr);
+    border-radius: var(--r-sm);
+    padding: 7px 13px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.18s;
+    white-space: nowrap;
+}
+
+.btn-refund:hover { background: #ede9fe; color: var(--purple-dark); }
+
+/* CANCEL REQUEST BANNER */
+.cancel-alert {
+    margin: 0 18px 14px;
+    padding: 11px 14px;
+    background: var(--red-bg);
+    border: 1px solid var(--red-bdr);
+    border-radius: var(--r-sm);
+    font-size: 0.78rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    color: var(--red-dark);
+}
+
+.cancel-alert-title {
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+}
+
+/* QR SCREENSHOT */
+.qr-box {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--purple-bg);
+    border: 1px solid var(--purple-bdr);
+    border-radius: var(--r-sm);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.76rem;
+    color: var(--purple-dark);
+}
+
+.qr-thumb {
+    width: 46px; height: 46px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid var(--purple-bdr);
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.18s;
+}
+
+.qr-thumb:hover { transform: scale(1.06); }
+
+/* LIGHTBOX */
+.lightbox {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.90);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+
+.lightbox.open { display: flex; }
+.lightbox img {
+    max-width: 90vw; max-height: 85vh;
+    border-radius: 12px;
+    object-fit: contain;
+}
+
+.lightbox-close {
+    position: absolute; top: 18px; right: 22px;
+    color: rgba(255,255,255,0.8);
+    font-size: 22px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.18s;
+}
+
+.lightbox-close:hover { background: rgba(255,255,255,0.18); color: #fff; }
+
+/* EMPTY */
+.empty-state {
+    text-align: center;
+    padding: 52px 24px;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--r-lg);
+}
+
+.empty-state h4 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+.empty-state p  { font-size: 0.8rem; color: var(--ink-faint); }
+
+/* RESPONSIVE */
+@media (max-width: 640px) {
+    .card-body  { grid-template-columns: 1fr; }
+    .dash-stats { grid-template-columns: repeat(2, 1fr); }
+    .card-footer { flex-direction: column; align-items: flex-start; }
+}
+</style>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img id="lightboxImg" src="" alt="Preview">
+</div>
+
+<div class="dash-page">
+
+    <!-- HERO -->
+    <div class="dash-hero">
+        <h1>🧑‍💼 Owner Orders Dashboard</h1>
+        <p>Manage all customer orders and track status</p>
+    </div>
+
+    {% if orders %}
+
+    <!-- STATS -->
+    <div class="dash-stats">
+        <div class="dash-stat">
+            <div class="dash-stat-icon">📦</div>
+            <div>
+                <div class="dash-stat-num">{{ orders|length }}</div>
+                <div class="dash-stat-lbl">Total Orders</div>
+            </div>
+        </div>
+        <div class="dash-stat">
+            <div class="dash-stat-icon">⏳</div>
+            <div>
+                <div class="dash-stat-num">{{ pending_count }}</div>
+                <div class="dash-stat-lbl">Pending Review</div>
+            </div>
+        </div>
+        <div class="dash-stat">
+            <div class="dash-stat-icon">🚨</div>
+            <div>
+                <div class="dash-stat-num">{{ cancel_request_count }}</div>
+                <div class="dash-stat-lbl">Cancel Requests</div>
+            </div>
+        </div>
+        <div class="dash-stat">
+            <div class="dash-stat-icon">💚</div>
+            <div>
+                <div class="dash-stat-num">{{ completed_count }}</div>
+                <div class="dash-stat-lbl">Completed</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-label">📦 All Orders</div>
+
+    {% for order in orders %}
+    <div class="order-card">
+
+        <!-- TOP BAR -->
+        <div class="card-top">
+            <div class="card-top-left">
+                <span class="order-id">#DK-{{ order.id }}</span>
+                <div class="customer-info">
+                    <strong>{{ order.user.username }}</strong>
+                    <small>{{ order.user.email }}</small>
+                </div>
+            </div>
+            <div class="card-top-right">
+                <!-- PAYMENT METHOD -->
+                {% if order.payment_method == "cod" %}
+                    <span class="chip chip-cod">📦 COD</span>
+                {% elif order.payment_method == "qr" %}
+                    <span class="chip chip-qr">🟣 QR</span>
+                {% endif %}
+
+                <!-- STATUS CHIP -->
+                {% if order.status == 'pending' %}
+                    <span class="chip chip-pending">⏳ Pending</span>
+                {% elif order.status == 'approved' %}
+                    <span class="chip chip-approved">✅ Approved</span>
+                {% elif order.status == 'shipped' %}
+                    <span class="chip chip-shipped">🚚 Shipped</span>
+                {% elif order.status == 'completed' %}
+                    <span class="chip chip-completed">📬 Delivered</span>
+                {% elif order.status == 'cancellation_requested' %}
+                    <span class="chip chip-cancel-req">🚨 Cancel Requested</span>
+                {% elif order.status == 'cancelled' %}
+                    <span class="chip chip-cancelled">❌ Cancelled</span>
+                {% elif order.status == 'refund_processing' %}
+                    <span class="chip chip-refund-proc">⏳ Refund Processing</span>
+                {% elif order.status == 'refunded' %}
+                    <span class="chip chip-refunded">💚 Refunded</span>
+                {% else %}
+                    <span class="chip">{{ order.status|title }}</span>
+                {% endif %}
+
+                <span class="order-date">{{ order.created_at|date:"d M Y" }} · {{ order.created_at|time:"H:i" }}</span>
+            </div>
+        </div>
+
+        <!-- BODY -->
+        <div class="card-body">
+            <div>
+                <!-- PRODUCTS -->
+                <div class="product-list">
+                    {% for item in order.items.all %}
+                    <div class="product-row">
+                        {% if item.product.image %}
+                            <img src="{{ item.product.image.url }}" class="product-thumb" alt="{{ item.product.name }}">
+                        {% else %}
+                            <img src="{% static 'images/logo.jpeg' %}" class="product-thumb" alt="Product">
+                        {% endif %}
+                        <div>
+                            <div class="product-name">{{ item.product.name }}</div>
+                            <div class="product-meta">Qty: {{ item.quantity }} &nbsp;·&nbsp; Rs {{ item.product.price }} each</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- QR SCREENSHOT -->
+                {% if order.qr_screenshot %}
+                <div class="qr-box">
+                    <img src="{{ order.qr_screenshot.url }}"
+                         class="qr-thumb"
+                         onclick="openLightbox('{{ order.qr_screenshot.url }}')"
+                         alt="Payment proof">
+                    <div>
+                        <div style="font-weight:700; margin-bottom:2px;">Payment Screenshot</div>
+                        <div style="font-size:0.7rem; opacity:0.75;">Tap to preview · Verify before approving</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- PRICING -->
+            <div class="pricing-panel">
+                <div class="pricing-row">
+                    <span class="lbl">Subtotal</span>
+                    <span class="val">Rs {% for item in order.items.all %}{{ item.total_price }}{% endfor %}</span>
+                </div>
+                <div class="pricing-row">
+                    <span class="lbl">Delivery</span>
+                    <span class="val">Rs {{ order.shipping_charge }}</span>
+                </div>
+                <div class="pricing-row total">
+                    <span class="lbl">Total</span>
+                    <span class="val">Rs {{ order.total_amount }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CANCELLATION ALERT BANNER -->
+        {% if order.status == 'cancellation_requested' %}
+        <div class="cancel-alert">
+            <div style="font-size:1rem; flex-shrink:0; margin-top:1px;">🚨</div>
+            <div>
+                <div class="cancel-alert-title">Customer Requested Cancellation</div>
+                <div>{{ order.user.username }} wants to cancel this order. Approve to process refund.</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- FOOTER: STATUS UPDATE + ACTION BUTTONS -->
+        <div class="card-footer">
+            <div class="footer-left">
+
+                <!-- CANCELLATION APPROVE BUTTON -->
+                {% if order.status == 'cancellation_requested' %}
+                <a href="{% url 'approve_cancellation' order.id %}"
+                   class="btn-approve"
+                   onclick="return confirm('Approve cancellation for Order #{{ order.id }}? Customer will be notified and refund processing will begin.')">
+                    ✅ Approve Cancellation
+                </a>
+                {% endif %}
+
+                <!-- MARK REFUND DONE BUTTON -->
+                {% if order.status == 'refund_processing' or order.status == 'cancelled' and order.payment_method == 'qr' %}
+                <a href="{% url 'mark_refund_done' order.id %}"
+                   class="btn-refund"
+                   onclick="return confirm('Mark refund as sent for Order #{{ order.id }}?')">
+                    💸 Mark Refund Done
+                </a>
+                {% endif %}
+
+            </div>
+
+            <!-- STATUS UPDATE FORM -->
+            <form method="POST"
+                  action="{% url 'update_order_status' order.id %}"
+                  class="status-form">
+                {% csrf_token %}
+                <select name="status" class="status-select">
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-update">Update</button>
+            </form>
+
+        </div>
+
+    </div>
+    {% endfor %}
+
+    {% else %}
+    <div class="empty-state">
+        <h4>📦 No Orders Yet</h4>
+        <p>Customer orders will appear here once they start placing them.</p>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+function openLightbox(src) {
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+}
+document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+});
+</script>
+
+{% endblock %}

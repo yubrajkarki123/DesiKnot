@@ -1,0 +1,257 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logo Viewer</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ========================= */
+        /* RESET & BASE STYLES */
+        /* ========================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19; /* Deep modern dark tone instead of pure black */
+            color: #f3f4f6;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ========================= */
+        /* VIEWER & CONTAINER */
+        /* ========================= */
+        .viewer-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .image-wrapper {
+            position: relative;
+            max-width: 90%;
+            max-height: 75vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Prevents scaled images from spilling outside the intended viewport */
+            overflow: visible; 
+        }
+
+        #zoomImage {
+            max-width: 100%;
+            max-height: 75vh;
+            object-fit: contain;
+            transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: zoom-in;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* ========================= */
+        /* TOP CONTROLS (CLOSE) */
+        /* ========================= */
+        .top-bar {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            z-index: 10;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* ========================= */
+        /* BOTTOM CONTROLS BAR */
+        /* ========================= */
+        .controls-toolbar {
+            margin-top: 30px;
+            background: rgba(30, 41, 59, 0.7); /* Translucent frosted glass effect */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 8px 16px;
+            border-radius: 30px;
+            display: flex;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .control-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .control-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .divider {
+            width: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 6px 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="viewer-container">
+        
+        <div class="top-bar">
+            <button class="close-btn" onclick="window.history.back()" title="Close and Go Back" aria-label="Close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+
+        <div class="image-wrapper">
+            <img id="zoomImage" 
+                 src="{% static 'images/logo.JPG' %}" 
+                 alt="Logo Workspace">
+        </div>
+
+        <div class="controls-toolbar">
+            <button class="control-btn" onclick="zoomIn()" title="Zoom In" aria-label="Zoom In">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+            
+            <button class="control-btn" onclick="zoomOut()" title="Zoom Out" aria-label="Zoom Out">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+            
+            <div class="divider"></div>
+
+            <button class="control-btn" onclick="resetZoom()" title="Reset Zoom" aria-label="Reset Zoom">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            </button>
+        </div>
+
+    </div>
+
+<script>
+    let scale = 1;
+    const MIN_SCALE = 0.5;
+    const MAX_SCALE = 4.0;
+    const img = document.getElementById("zoomImage");
+
+    /* Update image cursor style dynamically based on zoom state */
+    function updateCursor() {
+        if (scale === 1) {
+            img.style.cursor = "zoom-in";
+        } else {
+            img.style.cursor = "zoom-out";
+        }
+    }
+
+    /* Apply transformations uniformly */
+    function applyTransform() {
+        img.style.transform = `scale(${scale})`;
+        updateCursor();
+    }
+
+    /* ========================= */
+    /* ZOOM CORE FUNCTIONS */
+    /* ========================= */
+    function zoomIn() {
+        if (scale < MAX_SCALE) {
+            scale = Math.min(MAX_SCALE, scale + 0.25);
+            applyTransform();
+        }
+    }
+
+    function zoomOut() {
+        if (scale > MIN_SCALE) {
+            scale = Math.max(MIN_SCALE, scale - 0.25);
+            applyTransform();
+        }
+    }
+
+    function resetZoom() {
+        scale = 1;
+        applyTransform();
+    }
+
+    /* ========================= */
+    /* EVENT LISTENERS */
+    /* ========================= */
+
+    // Smooth Wheel Zooming
+    img.addEventListener("wheel", function(e) {
+        e.preventDefault();
+        if (e.deltaY < 0) {
+            zoomIn();
+        } else {
+            zoomOut();
+        }
+    }, { passive: false });
+
+    // Double-click toggles between full-zoom and reset 
+    img.addEventListener("dblclick", function() {
+        if (scale !== 1) {
+            resetZoom();
+        } else {
+            scale = 2;
+            applyTransform();
+        }
+    });
+</script>
+
+</body>
+</html>

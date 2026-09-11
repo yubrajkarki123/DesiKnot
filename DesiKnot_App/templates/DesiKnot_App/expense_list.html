@@ -1,0 +1,212 @@
+{% extends 'DesiKnot_App/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+
+.exp-wrapper{
+    background: #f6f7fb;
+}
+
+.exp-form-card{
+    background: #fff;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    margin-bottom: 30px;
+}
+
+.exp-table-card{
+    background: #fff;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+}
+
+.custom-input{
+    border-radius: 12px;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+}
+
+.custom-input:focus{
+    border-color: #198754;
+    box-shadow: 0 0 0 3px rgba(25,135,84,0.1);
+    outline: none;
+}
+
+.submit-exp-btn{
+    background: linear-gradient(135deg,#198754,#20c997);
+    border: none;
+    color: white;
+    padding: 10px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.exp-table th{
+    color: #888;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    border-bottom: 2px solid #eee;
+    padding: 12px 10px;
+}
+
+.exp-table td{
+    padding: 12px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.category-badge{
+    background: rgba(220,53,69,0.1);
+    color: #dc3545;
+    padding: 4px 12px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.quick-links a{
+    text-decoration: none;
+    color: #198754;
+    font-weight: 600;
+    margin-right: 20px;
+}
+
+.empty-exp{
+    text-align: center;
+    color: #999;
+    padding: 40px 0;
+    font-style: italic;
+}
+
+.btn-del{
+    color: #dc3545;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+</style>
+
+<div class="exp-wrapper py-4">
+<div class="container">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <h2 class="fw-bold mb-0">💸 Expenses</h2>
+    </div>
+
+    <div class="quick-links mb-4">
+        <a href="{% url 'accounting_dashboard' %}">← Back to Dashboard</a>
+        <a href="{% url 'accounting_ledger' %}">📒 View Ledger</a>
+    </div>
+
+    <!-- ADD EXPENSE FORM -->
+    <div class="exp-form-card">
+
+        <h5 class="fw-bold mb-4">Add New Expense</h5>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Title</label>
+                    <input type="text" name="title" class="form-control custom-input" placeholder="e.g. Fabric purchase" required>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Category</label>
+                    <select name="category" class="form-select custom-input">
+                        {% for value, label in categories %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Amount (Rs)</label>
+                    <input type="number" step="0.01" name="amount" class="form-control custom-input" placeholder="0.00" required>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Date</label>
+                    <input type="date" name="date" class="form-control custom-input">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Note (optional)</label>
+                    <input type="text" name="note" class="form-control custom-input" placeholder="Any additional detail">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Receipt (optional)</label>
+                    <input type="file" name="receipt" class="form-control custom-input">
+                </div>
+
+            </div>
+
+            <button type="submit" class="submit-exp-btn mt-4">
+                Add Expense
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- EXPENSE LIST -->
+    <div class="exp-table-card">
+
+        {% if expenses %}
+
+        <div class="table-responsive">
+            <table class="table exp-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Note</th>
+                        <th class="text-end">Amount</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in expenses %}
+                    <tr>
+                        <td>{{ e.date|date:"M d, Y" }}</td>
+                        <td>{{ e.title }}</td>
+                        <td><span class="category-badge">{{ e.get_category_display }}</span></td>
+                        <td>{{ e.note|default:"-" }}</td>
+                        <td class="text-end fw-bold text-danger">- Rs {{ e.amount|floatformat:2 }}</td>
+                        <td>
+                            <a href="{% url 'expense_delete' e.id %}" class="btn-del"
+                               onclick="return confirm('Delete this expense?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="empty-exp">
+            No expenses recorded yet.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+</div>
+
+{% endblock %}
